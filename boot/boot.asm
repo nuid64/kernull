@@ -1,6 +1,9 @@
         section .text
         bits 32
 
+extern protected_vga_print
+extern protected_vga_set_color
+
 global _start
 _start:
         mov        esp, stack_top
@@ -81,6 +84,7 @@ multiboot_check:
         jne        .no_multiboot
         ret
 .no_multiboot:
+        mov        esi, no_multiboot_err
         call       error
 
 
@@ -116,6 +120,7 @@ cpuid_check:
         jz         .no_cpuid
         ret
 .no_cpuid:
+        mov        esi, no_cpuid_err
         call       error
 
 
@@ -131,13 +136,28 @@ long_supported_check:
         jz         .no_long_supported
         ret
 .no_long_supported:
+        mov        esi, no_long_supported_err
         call       error
 
 
-; oopsie
+; print error message and hangs
+; IN  = ESI: error message addr
 error:
-        mov        word [0xB8000], 0x0F46
-        mov        word [0xB8002], 0x0F4B
+        ; prefix with red [ERR]
+        mov        dl, 0x0
+        mov        dh, 0x4
+        call       protected_vga_set_color
+
+        push       esi
+        mov        esi, err_prefix
+        call       protected_vga_print
+
+        ; print the message
+        mov        dl, 0x0
+        mov        dh, 0xF
+        call       protected_vga_set_color
+        pop        esi
+        call       protected_vga_print
         hlt
 
 
@@ -149,6 +169,11 @@ gdt64:
 .pointer:
         dw $ - gdt64 - 1
         dq gdt64
+
+err_prefix db "[ERR]: ", 0x00
+no_multiboot_err db "needs to be load by Multiboot compiant loader", 0x00
+no_cpuid_err db "CPUID is not supported by the processor", 0x00
+no_long_supported_err db "long mode is not supported by the processor", 0x00
 
 
         section .bss
