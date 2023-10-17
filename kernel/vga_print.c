@@ -33,7 +33,7 @@ static inline u8 entry_color(enum vga_color fg, enum vga_color bg)
     return fg | bg << 4;
 }
  
-static inline u16 entry(unsigned char uc, u8 color)
+static inline u16 entry(char uc, u8 color)
 {
     return (u16) uc | (u16) color << 8;
 }
@@ -46,7 +46,7 @@ size_t strlen(const char* str)
     return len;
 }
 
-void vga_terminal_initialize(void)
+void vga_terminal_initialize()
 {
     vga_row = 0;
     vga_column = 0;
@@ -101,13 +101,13 @@ void putchar(char c)
     }
 }
  
-void vga_write(const char* data, size_t size)
+void vga_write(const char* s, size_t size)
 {
     for (size_t i = 0; i < size; i++)
-        putchar(data[i]);
+        putchar(s[i]);
 }
  
-void vga_print(const char* data)
+void vga_print(const char* s)
 {
-    vga_write(data, strlen(data));
+    vga_write(s, strlen(s));
 }

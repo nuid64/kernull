@@ -1,5 +1,7 @@
-void vga_terminal_initialize(void);
+#include "types.h"
 
-void vga_print(const char*);
+void vga_terminal_initialize();
 
-void vga_set_color(char, char);
+void vga_print(const char* s);
+
+void vga_set_color(u8 color);

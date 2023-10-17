@@ -9,8 +9,6 @@ global _start
 _start:
         mov        esp, stack_top
 
-        ; <- init all what I need here :' ;just concentrated silly face
-
         ; some checks
         call       multiboot_check
         call       cpuid_check
