@@ -1,6 +1,7 @@
         section .text
         bits 32
 
+extern long_mode_start
 extern protected_vga_print
 extern protected_vga_set_color
 
@@ -19,10 +20,9 @@ _start:
         call       setup_page_tables
         call       enable_paging
 
-        mov        eax, 0xF036
-        mov        [0xB8000], eax
-        mov        eax, 0x0F34
-        mov        [0xB8002], eax
+        ; call kmain from there
+        lgdt       [gdt64.pointer]
+        jmp        gdt64.code:long_mode_start
 
         cli
 .hang:  hlt
@@ -187,5 +187,5 @@ p2_table:
 
 align 16
 stack_bottom:
-        resb 64 ; just like me...
+        resb 16384 ; 16KiB
 stack_top:
