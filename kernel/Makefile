@@ -9,8 +9,8 @@ C_OBJ := $(patsubst %.c, \
 		   $(BUILD)/%.o, $(C_SRC))
 
 CFLAGS := -ffreestanding -nostdlib -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra -O2
+CINCLUDES := -I../include
 NASMFLAGS := -felf64
-
 
 .PHONY: kernel
 
@@ -18,7 +18,7 @@ kernel: $(ASM_OBJ) $(C_OBJ)
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(shell dirname $@)
-	@x86_64-elf-gcc $(CFLAGS) -c $< -o $@
+	@x86_64-elf-gcc $(CFLAGS) $(CINCLUDES) -c $< -o $@
 
 $(BUILD)/%.o: %.asm
 	@mkdir -p $(shell dirname $@)

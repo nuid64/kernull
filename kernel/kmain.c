@@ -1,6 +1,3 @@
-#include <stdint.h>
-#include <stddef.h>
-
 #include "vga_print.h"
 
 void kmain(void) {
