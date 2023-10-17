@@ -12,10 +12,7 @@ long_mode_start:
         mov        fs, ax
         mov        gs, ax
 
-        mov        eax, 0xF036
-        mov        [0xB8000], eax
-        mov        eax, 0x0F34
-        mov        [0xB8002], eax
+        call       kmain
 
         cli
         hlt
