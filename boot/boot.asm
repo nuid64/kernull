@@ -1,9 +1,9 @@
-        section .text
-        bits 32
-
 extern long_mode_start
 extern protected_vga_print
 extern protected_vga_set_color
+
+        bits 32
+        section .bootstrap
 
 global _start
 _start:
@@ -18,13 +18,8 @@ _start:
         call       setup_page_tables
         call       enable_paging
 
-        ; call kmain from there
         lgdt       [gdt64.pointer]
-        jmp        gdt64.code:long_mode_start
-
-        cli
-.hang:  hlt
-        jmp .hang
+        jmp        gdt64.code:long_mode_start                  ; call kmain from there
 
 
 setup_page_tables:
@@ -159,14 +154,28 @@ error:
         hlt
 
 
-        section .rodata
 gdt64:
         dq 0
 .code: equ $ - gdt64
-        dq (1<<43) | (1<<44) | (1<<47) | (1<<53)               ; code segment
+        dw 0
+        dw 0
+        db 0
+        db 0x9a
+        db 0x20
+        db 0
+.data:
+        dw 0xFFFF
+        dw 0
+        db 0
+        db 0x92
+        db 0
+        db 0
 .pointer:
         dw $ - gdt64 - 1
         dq gdt64
+
+
+        section .rodata
 
 err_prefix db "[ERR]: ", 0x00
 no_multiboot_err db "needs to be load by Multiboot compiant loader", 0x00
@@ -175,6 +184,7 @@ no_long_supported_err db "long mode is not supported by the processor", 0x00
 
 
         section .bss
+
 align 4096
 p4_table:
         resb 4096

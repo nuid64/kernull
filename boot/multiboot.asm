@@ -1,4 +1,4 @@
-        section .multiboot_header
+        section .multiboot
 header_start:
         dd 0xE85250D6                                          ; magic
         dd 0                                                   ; arch (i386)
