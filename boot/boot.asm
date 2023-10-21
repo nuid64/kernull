@@ -18,8 +18,8 @@ _start:
         call       setup_page_tables
         call       enable_paging
 
-        lgdt       [gdt64.pointer]
-        jmp        gdt64.code:long_mode_start                  ; call kmain from there
+        lgdt       [gdt_temp.pointer]
+        jmp        gdt_temp.code:long_mode_start                  ; call kmain from there
 
 
 setup_page_tables:
@@ -154,9 +154,9 @@ error:
         hlt
 
 
-gdt64:
+gdt_temp:
         dq 0
-.code: equ $ - gdt64
+.code: equ $ - gdt_temp
         dw 0
         dw 0
         db 0
@@ -171,8 +171,8 @@ gdt64:
         db 0
         db 0
 .pointer:
-        dw $ - gdt64 - 1
-        dq gdt64
+        dw $ - gdt_temp - 1
+        dq gdt_temp
 
 
         section .rodata
