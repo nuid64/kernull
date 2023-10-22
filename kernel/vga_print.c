@@ -111,3 +111,44 @@ void vga_print(const char* s)
 {
     vga_write(s, strlen(s));
 }
+
+void vga_print_num(u64 num)
+{
+    // HINT
+    // "nuid64, but 21 byte would be enough to squeeze u64 with \0. Why did you..."
+    // ALIGNMENT, FUCKERS
+    char str[24];
+    u8 idx = 0;
+
+    if (num == 0) {
+        str[0] = '0';
+        str[1] = 'x';
+        str[2] = '0';
+        str[3] = '\0';
+    } else {
+        while (num != 0) {
+            u64 rem = num % 16;
+            str[idx++] = (rem > 9)? (rem - 10) + 'a' : rem + '0';
+            num /= 16;
+        }
+
+        // place 0x because I want it to be (it'll stand right after reverse)
+        str[idx++] = 'x';
+        str[idx++] = '0';
+
+        str[idx] = '\0';
+
+        // reverse digits (to the right order)
+        --idx;                          // \0 is not a part of str
+        u8 end = idx - 1;
+        u8 pivot = (idx+1) / 2;
+        while (idx >= pivot) {
+            u8 tmp = str[end - idx];
+            str[end - idx] = str[idx];
+            str[idx] = tmp;
+            --idx;
+        }
+    }
+
+    vga_print(str);
+}
