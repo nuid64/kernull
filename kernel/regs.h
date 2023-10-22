@@ -1,5 +1,4 @@
-#ifndef REGS_H
-#define REGS_H
+#pragma once
 
 #include "types.h"
 
@@ -15,5 +14,3 @@ struct regs {
     // pushed by interrupt
     u64 rip, cs, rflags, rsp, ss;
 };
-
-#endif

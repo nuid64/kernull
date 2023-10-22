@@ -1,5 +1,4 @@
-#ifndef SEGMENT_SELECTOR_H
-#define SEGMENT_SELECTOR_H
+#pragma once
 
 #include "types.h"
 
@@ -11,5 +10,3 @@ union segment_selector {
     } bits;
     u16 full;
 };
-
-#endif

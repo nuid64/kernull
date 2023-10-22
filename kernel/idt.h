@@ -1,5 +1,4 @@
-#ifndef IDT_H
-#define IDT_H
+#pragma once
 
 #include "types.h"
 #include "segment_selector.h"
@@ -64,5 +63,3 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
-
-#endif

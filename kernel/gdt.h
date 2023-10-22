@@ -1,5 +1,4 @@
-#ifndef GDT_H
-#define GDT_H
+#pragma once
 
 #include "types.h"
 
@@ -42,5 +41,3 @@ struct gdtr {
     u16 limit;
     u64 base;
 } __attribute__((packed));
-
-#endif
