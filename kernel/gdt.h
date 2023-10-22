@@ -38,6 +38,6 @@ struct gdt_entry {
 } __attribute((packed));
 
 struct gdtr {
-    u16 limit;
-    u64 base;
+    u16 size; // GDT size - 1
+    u64 base; // GDT address
 } __attribute((packed));
