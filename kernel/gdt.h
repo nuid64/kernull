@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include <types.h>
 
 void init_gdt();
 
@@ -15,7 +15,7 @@ union gdt_access {
         u8 present  : 1; // must be 1 for any valid segment
     } bits;
     u8 full;
-} __attribute((packed));
+};
 
 union gdt_flags {
     struct {
@@ -26,18 +26,18 @@ union gdt_flags {
         u8 granularity : 1; // 0 for byte granularity, 1 for page granularity (4KiB)
     } bits;
     u8 full;
-} __attribute((packed));
+};
 
-struct gdt_entry {
+typedef struct {
     u16 limit_low;
     u16 base_low;
     u8  base_middle;
     union gdt_access access;
     union gdt_flags flags;   // WARN: limit_high stored in flags' least 4 bits
     u8 base_high;
-} __attribute((packed));
+} gdt_entry;
 
-struct gdtr {
+typedef struct __attribute((packed)) {
     u16 size; // GDT size - 1
     u64 base; // GDT address
-} __attribute((packed));
+} gdtr;

@@ -1,7 +1,7 @@
 #include "gdt.h"
 
-static struct gdt_entry GDT[5];
-static struct gdtr GDTR;
+static gdt_entry GDT[5];
+static gdtr GDTR;
 
 extern void gdt_load(u64 gdtr);
 
@@ -9,7 +9,7 @@ static void gdt_set_entry(u64 idx, u32 base, u32 limit, u8 access, u8 flags);
 
 void init_gdt()
 {
-    GDTR.size = (sizeof(struct gdt_entry) * 5) - 1;
+    GDTR.size = (sizeof(gdt_entry) * 5) - 1;
     GDTR.base  = (u64) &GDT;
 
     gdt_set_entry(0, 0, 0, 0, 0);

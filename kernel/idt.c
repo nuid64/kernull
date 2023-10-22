@@ -3,12 +3,12 @@
 
 extern void idt_load(u64 idtr);
 
-static struct idtr IDTR;
-static struct idt_entry IDT[256];
+static idtr IDTR;
+static idt_entry IDT[256];
 
 void init_idt()
 {
-    IDTR.size = sizeof(struct idt_entry) * 256 - 1;
+    IDTR.size = sizeof(idt_entry) * 256 - 1;
     IDTR.base = (u64) &IDT;
 
     idt_set_gate(0, (u64) isr0, 0x08, 0, 0x8E);

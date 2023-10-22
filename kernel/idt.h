@@ -1,12 +1,12 @@
 #pragma once
 
-#include "types.h"
-#include "segment_selector.h"
+#include <types.h>
+#include <segment_selector.h>
 
 void init_idt();
 void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs);
 
-union idt_attrs {
+union idt_attributes {
     struct {
         u8 gate_type : 4; // 0b1110 = Interrupt Gate, 0b1111 = Trap Gate
         u8 zero      : 1; // must be 0
@@ -14,22 +14,22 @@ union idt_attrs {
         u8 present   : 1; // must be 1 for any valid descriptor
     } bits;
     u8 full;
-};
+} ;
 
-struct idt_entry {
+typedef struct {
     u16 base_low;
     union segment_selector selector; // 16-bit selector
     u8 ist;                          // first 3 bits are the actual IST value, rest are reserved
-    union idt_attrs attrs;           // attributes byte
+    union idt_attributes attrs;           // attributes byte
     u16 base_mid;
     u32 base_high;
     u32 _res;                        // reserved
-};
+} idt_entry;
 
-struct idtr {
+typedef struct __attribute((packed)) {
     u16 size; // IDT size - 1
     u64 base; // IDT address
-} __attribute((packed));
+} idtr;
 
 extern void isr0();
 extern void isr1();
