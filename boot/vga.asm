@@ -1,6 +1,6 @@
 ; Allow print messages before entering long mode
 
-        section .text
+        section .code
         bits 32
 
 VGA_WIDTH  equ 80

@@ -1,8 +1,8 @@
+ 	section .code
+        bits 64
+
 global long_mode_start
 extern kmain
-
- 	section .text
-        bits 64
 
 long_mode_start:
         cli

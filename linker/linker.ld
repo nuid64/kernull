@@ -5,12 +5,12 @@ SECTIONS {
     . = 1M;
     phys = .;
 
-    .text BLOCK(4K) : ALIGN(4K)
+    .code BLOCK(4K) : ALIGN(4K)
     {
         *(.multiboot)
         *(.bootstrap)
         code = .;
-        *(.text)
+        *(.code)
     }
 
     .rodata BLOCK(4K) : ALIGN(4K)

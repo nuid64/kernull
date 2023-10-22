@@ -1,9 +1,9 @@
+        bits 32
+        section .bootstrap
+
 extern long_mode_start
 extern protected_vga_print
 extern protected_vga_set_color
-
-        bits 32
-        section .bootstrap
 
 global _start
 _start:

@@ -3,13 +3,13 @@
 
 extern void idt_load(u64 idtr);
 
-static struct idtr idtr;
+static struct idtr IDTR;
 static struct idt_entry IDT[256];
 
 void init_idt()
 {
-    idtr.size = sizeof(struct idt_entry) * 256 - 1;
-    idtr.base = (u64) &IDT;
+    IDTR.size = sizeof(struct idt_entry) * 256 - 1;
+    IDTR.base = (u64) &IDT;
 
     idt_set_gate(0, (u64) isr0, 0x08, 0, 0x8E);
     idt_set_gate(1, (u64) isr1, 0x08, 0, 0x8E);
@@ -46,7 +46,7 @@ void init_idt()
 
     asm volatile (
         "lidt %0"
-        : : "m"(idtr)
+        : : "m"(IDTR)
 	);
 }
 
