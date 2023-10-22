@@ -15,7 +15,7 @@ union gdt_access {
         u8 present  : 1; // must be 1 for any valid segment
     } bits;
     u8 full;
-} __attribute__((packed));
+} __attribute((packed));
 
 union gdt_flags {
     struct {
@@ -26,7 +26,7 @@ union gdt_flags {
         u8 granularity : 1; // 0 for byte granularity, 1 for page granularity (4KiB)
     } bits;
     u8 full;
-} __attribute__((packed));
+} __attribute((packed));
 
 struct gdt_entry {
     u16 limit_low;
@@ -35,9 +35,9 @@ struct gdt_entry {
     union gdt_access access;
     union gdt_flags flags;   // WARN: limit_high stored in flags' least 4 bits
     u8 base_high;
-} __attribute__((packed));
+} __attribute((packed));
 
 struct gdtr {
     u16 limit;
     u64 base;
-} __attribute__((packed));
+} __attribute((packed));

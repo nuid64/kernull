@@ -29,7 +29,7 @@ struct idt_entry {
 struct idtr {
     u16 size; // IDT size - 1
     u64 base; // IDT address
-} __attribute__((packed));
+} __attribute((packed));
 
 extern void isr0();
 extern void isr1();
