@@ -14,9 +14,9 @@ void init_gdt()
 
     gdt_set_entry(0, 0, 0, 0, 0);
     gdt_set_entry(1, 0, 0xFFFFFFFF, 0x9A, 0x0A);
-    gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0x0A);
+    gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0x0C);
     gdt_set_entry(3, 0, 0xFFFFFFFF, 0xFA, 0x0A);
-    gdt_set_entry(4, 0, 0xFFFFFFFF, 0xF2, 0x0A);
+    gdt_set_entry(4, 0, 0xFFFFFFFF, 0xF2, 0x0C);
 
     gdt_load((u64) &GDTR);
 }
