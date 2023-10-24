@@ -1,13 +1,18 @@
+#include <asm/x86.h>
 #include "idt.h"
 #include "regs.h"
+#include "pic.h"
 
 extern void idt_load(u64 idtr);
 
 static idtr IDTR;
 static idt_entry IDT[256];
+static irq_routine irq_handlers[256];
 
 void init_idt()
 {
+    pic_remap();
+
     IDTR.size = sizeof(idt_entry) * 256 - 1;
     IDTR.base = (u64) &IDT;
 
@@ -44,6 +49,23 @@ void init_idt()
     idt_set_gate(30, (u64) isr30, 0x08, 0, 0x8E);
     idt_set_gate(31, (u64) isr31, 0x08, 0, 0x8E);
 
+    idt_set_gate(32, (u64) irq0, 0x08, 0, 0x8E);
+    idt_set_gate(33, (u64) irq1, 0x08, 0, 0x8E);
+    idt_set_gate(34, (u64) irq2, 0x08, 0, 0x8E);
+    idt_set_gate(35, (u64) irq3, 0x08, 0, 0x8E);
+    idt_set_gate(36, (u64) irq4, 0x08, 0, 0x8E);
+    idt_set_gate(37, (u64) irq5, 0x08, 0, 0x8E);
+    idt_set_gate(38, (u64) irq6, 0x08, 0, 0x8E);
+    idt_set_gate(39, (u64) irq7, 0x08, 0, 0x8E);
+    idt_set_gate(40, (u64) irq8, 0x08, 0, 0x8E);
+    idt_set_gate(41, (u64) irq9, 0x08, 0, 0x8E);
+    idt_set_gate(42, (u64) irq10, 0x08, 0, 0x8E);
+    idt_set_gate(43, (u64) irq11, 0x08, 0, 0x8E);
+    idt_set_gate(44, (u64) irq12, 0x08, 0, 0x8E);
+    idt_set_gate(45, (u64) irq13, 0x08, 0, 0x8E);
+    idt_set_gate(46, (u64) irq14, 0x08, 0, 0x8E);
+    idt_set_gate(47, (u64) irq15, 0x08, 0, 0x8E);
+
     asm volatile (
         "lidt %0"
         : : "m"(IDTR)
@@ -61,10 +83,33 @@ void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs)
     IDT[idx].attrs.full    = attrs;
 };
 
+void irq_set_handler(u8 irq, irq_routine handler)
+{
+    irq_handlers[irq] = handler;
+}
+
 // FIXME dummy for now
 #include "vga_print.h"
 struct regs* isr_handler(struct regs* r)
 {
-    vga_print("received interrupt");
+    vga_print("received interrupt\n");
+    
+    return r;
+}
+
+struct regs* irq_handler(struct regs* r)
+{
+    // send EOI signal
+    if (r->int_no >= 40) {
+        outb(0xA0, 0x20);  // to slave
+    }
+    outb(0x20, 0x20); // to master
+
+    if (irq_handlers[r->int_no])
+    {
+        irq_routine handler = irq_handlers[r->int_no];
+        handler(r);
+    }
+
     return r;
 }

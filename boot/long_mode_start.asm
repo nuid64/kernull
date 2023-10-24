@@ -19,6 +19,5 @@ long_mode_start:
         call       kmain
 
 halt:
-        cli
         hlt
         jmp        halt

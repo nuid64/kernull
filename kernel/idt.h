@@ -1,10 +1,14 @@
 #pragma once
 
-#include <types.h>
-#include <segment_selector.h>
+#include <kernel/types.h>
+#include <kernel/segment_selector.h>
+#include "regs.h"
 
 void init_idt();
 void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs);
+
+typedef u32 (*irq_routine) (struct regs*);
+void irq_set_handler(u8 irq, irq_routine handler);
 
 union idt_attributes {
     struct {
@@ -63,3 +67,19 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();

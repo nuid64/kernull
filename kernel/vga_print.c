@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include <types.h>
+#include <kernel/types.h>
 
 enum vga_color {
     VGA_COLOR_BLACK = 0,

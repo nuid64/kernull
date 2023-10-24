@@ -1,6 +1,7 @@
 #include "vga_print.h"
 #include "gdt.h"
 #include "idt.h"
+#include "pit.h"
 
 void kmain()
 {
@@ -8,7 +9,9 @@ void kmain()
 
     init_gdt();
     init_idt();
+    pit_init();
 
-    vga_print("My master is nuid64 <3\n");
-    asm volatile ("int $0x03");            // test interrupt
+    vga_print("My ma... oh, no, I'M TICKING AWAY! HlEPP!P!!!!\n");
+
+    asm volatile ("sti"); // enable interrupts :P
 }

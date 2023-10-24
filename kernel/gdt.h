@@ -1,6 +1,6 @@
 #pragma once
 
-#include <types.h>
+#include <kernel/types.h>
 
 void init_gdt();
 

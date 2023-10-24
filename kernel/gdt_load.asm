@@ -10,7 +10,7 @@ gdt_load:
         ret
 
         ; reload segment registers
-reload_segments
+reload_segments:
         push       0x08
         lea        rax, [rel .reload_cs]
         push       rax
