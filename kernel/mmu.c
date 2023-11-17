@@ -5,22 +5,22 @@
 #include "idt.h"
 
 #define KERNEL_PML_ACCESS 0x03
-#define USER_PML_ACCESS 0x07
-#define LARGE_PAGE_BIT 0x80
+#define USER_PML_ACCESS   0x07
+#define LARGE_PAGE_BIT    0x80
 
 #define CANONICAL_MASK 0xFFFFFFFFFFFF
-#define PHYS_MASK 0x7FFFFFFFFF
+#define PHYS_MASK        0x7FFFFFFFFF
 
 #define LARGE_PAGE_SIZE 0x200000
-#define PAGE_SIZE 0x1000
+#define PAGE_SIZE         0x1000
 #define PAGE_SHIFT 12
 #define PAGE_SIZE_MASK 0xFFFFFFFFFFFFF000
 #define PAGE_LOW_MASK  0x0000000000000FFF
 
 #define PML3_MASK  0x3FFFFFFF
-#define PML2_MASK  0x1FFFFF
-#define PT_MASK    PAGE_LOW_MASK
-#define ENTRY_MASK 0x1FF
+#define PML2_MASK    0x1FFFFF
+#define PT_MASK  PAGE_LOW_MASK
+#define ENTRY_MASK      0x1FF
 
 static size_t total_memory = 0;
 static size_t unavailable_memory = 0;
