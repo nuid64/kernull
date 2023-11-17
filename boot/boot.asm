@@ -18,39 +18,43 @@ _start:
         call       setup_page_tables
         call       enable_paging
 
-        lgdt       [gdt_temp.pointer]
-        jmp        gdt_temp.code:long_mode_start                  ; call kmain from there
+        lgdt       [gdt.pointer]
+        jmp        gdt.code:long_mode_start                    ; call kmain from there
 
 
 setup_page_tables:
+extern initial_page_tables
+        mov        edi, initial_page_tables
+
         ; map first P4 entry to P3 table
-        mov        eax, p3_table
+        mov        eax, 0x1000                                 ; P3 table offset...
+        add        eax, edi                                    ; ... from P4
         or         eax, 0b11                                   ; present + writeable
-        mov        [p4_table], eax
+        mov        [edi], eax                                  ; P4[0] = & P3[0] | present | writeable
 
+        add        edi, 0x1000                                 ; P3
         ; map first P3 entry to P2 table
-        mov        eax, p2_table
+        mov        eax, 0x1000                                 ; P2 table offset...
+        add        eax, edi                                    ; ... from P3
         or         eax, 0b11                                   ; present + writeable
-        mov        [p3_table], eax
+        mov        [edi], eax                                  ; P4[0] = & P3[0] | present | writeable
 
-        ; map each P2 entry to a huge 2MiB page
-        mov        ecx, 0
-.map_p2_table:
-        mov        eax, 0x200000                               ; 2MiB
-        mul        ecx
-        or         eax, 0b10000011                             ; present + writeable + huge
-        mov        [p2_table + ecx * 8], eax                   ; map entry
-
-        inc        ecx
-        cmp        ecx, 512
-        jne        .map_p2_table
+        ; map 32 2MiB pages to 64MiB of low memory temporarily, until MMU initialization
+        add        edi, 0x1000                                 ; P2
+        mov        ebx, 0b10000011                             ; present + writeable + huge
+        mov        ecx, 32
+.set_entry:
+        mov        [edi], ebx
+        add        edx, 0x200000                               ; next 2MiB
+        add        edi, 8
+        loop       .set_entry
 
         ret
 
 
 enable_paging:
         ; load P4 to cr3 register
-        mov        eax, p4_table
+        mov        eax, initial_page_tables
         mov        cr3, eax
 
         ; enable PAE-flag in cr4
@@ -154,9 +158,9 @@ error:
         hlt
 
 
-gdt_temp:
+gdt:
         dq 0
-.code: equ $ - gdt_temp
+.code: equ $ - gdt
         dw 0
         dw 0
         db 0
@@ -171,8 +175,8 @@ gdt_temp:
         db 0
         db 0
 .pointer:
-        dw $ - gdt_temp - 1
-        dq gdt_temp
+        dw $ - gdt - 1
+        dq gdt
 
 
         section .rodata
@@ -184,14 +188,6 @@ no_long_supported_err db "long mode is not supported by the processor", 0x00
 
 
         section .bss
-
-align 4096
-p4_table:
-        resb 4096
-p3_table:
-        resb 4096
-p2_table:
-        resb 4096
 
 align 16
 stack_bottom:

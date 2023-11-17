@@ -5,8 +5,6 @@ global long_mode_start
 extern kmain
 
 long_mode_start:
-        cli
-
         mov        ax, 0x10
         mov        ss, ax
         mov        ds, ax
@@ -19,5 +17,5 @@ long_mode_start:
         call       kmain
 
 halt:
+        cli
         hlt
-        jmp        halt

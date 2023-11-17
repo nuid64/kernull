@@ -75,7 +75,7 @@ void init_idt()
 void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs)
 {
     IDT[idx].base_low      = base & 0xFFFF;
-    IDT[idx].base_mid   = (base >> 16) & 0xFFFF;
+    IDT[idx].base_mid      = (base >> 16) & 0xFFFF;
     IDT[idx].base_high     = (base >> 32) & 0xFFFFFFFF;
 
     IDT[idx].selector.full = sel;

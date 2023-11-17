@@ -139,8 +139,7 @@ void vga_print_num(u64 num)
         str[idx] = '\0';
 
         // reverse digits (to the right order)
-        --idx;                          // \0 is not a part of str
-        u8 end = idx - 1;
+        u8 end = idx - 1;                   // \0 is not a part of str
         u8 pivot = (idx+1) / 2;
         while (idx >= pivot) {
             u8 tmp = str[end - idx];
