@@ -2,12 +2,6 @@
 
 #include "pml.h"
 
-// const size_t VIRTUAL_AREA_LOWER  = KERNEL_STACK_START;
-// const size_t VIRTUAL_AREA_UPPER  = 0xfffffe8000000000;
-
-// const size_t USER_AREA = 0x400000;
-// const size_t USER_AREA_SIZE = 0x800000000000 - USER_AREA;
-
 #define KERNEL_HEAP_START  0xFFFFFF0000000000
 #define KERNEL_STACK_SIZE  256 * 1024
 #define KERNEL_STACK_END   0xFFFF800000001000

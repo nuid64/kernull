@@ -15,10 +15,8 @@ u64 kmalloc(u64 size)
 
 u64 kmalloc_a(u64 size)
 {
-    if (placement_address & 0xFFFFFFFFFFFFF000) {
-    // if (placement_address & ~0xFFF) {
-        placement_address &= 0xFFFFFFFFFFFFF000;
-        // placement_address &= ~0xFFF;
+    if (placement_address & 0xFFF) {
+        placement_address &= ~0xFFF;
         placement_address += 0x1000;
     }
 
@@ -30,10 +28,8 @@ u64 kmalloc_a(u64 size)
 
 u64 kmalloc_ap(u64 size, u64* phys)
 {
-    if (placement_address & 0xFFFFFFFFFFFFF000) {
-    // if (placement_address & ~0xFFF) {
-        placement_address &= 0xFFFFFFFFFFFFF000;
-        // placement_address &= ~0xFFF;
+    if (placement_address & 0xFFF) {
+        placement_address &= ~0xFFF;
         placement_address += 0x1000;
     }
 
