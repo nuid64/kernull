@@ -1,5 +1,5 @@
 #include <kernel/types.h>
-#include "kheap.h"
+#include "kmalloc.h"
 #include "mmu.h"
 
 u64 placement_address = KERNEL_HEAP_START;
