@@ -8,8 +8,8 @@
 #define USER_PML_ACCESS   0x07
 #define LARGE_PAGE_BIT    0x80
 
-#define CANONICAL_MASK 0xFFFFFFFFFFFF
-#define PHYS_MASK        0x7FFFFFFFFF
+#define CANONICAL_MASK 0x0000FFFFFFFFFFFF
+#define PHYS_MASK      0x0000007FFFFFFFFF
 
 #define LARGE_PAGE_SIZE 0x200000
 #define PAGE_SIZE         0x1000
@@ -39,15 +39,15 @@ pml_entry heap_base_pml1[512*3] __attribute((aligned(PAGE_SIZE))) = {0};
 
 pml_entry* current_pml4;
 
-void* mmu_get_mapped(u64 frame_addr)
+void* mmu_to_virt(u64 phys_addr)
 {
-    return (void*) (frame_addr | HIGH_MAP_REGION);
+    return (void*) (phys_addr | HIGH_MAP_REGION);
 }
 
-// find the physical address
+// get the physical address
 // if page is not mapped, a negative value from -1 to -4 returned, which indicates which level
 // of the page directory is unmapped (-1 = no PML4, -4 = no page in PML1)
-u64 mmu_translate(pml_entry* root, u64 virt_addr)
+u64 mmu_to_phys(pml_entry* root, u64 virt_addr)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
     u64 page_addr = real_bits >> PAGE_SHIFT;
@@ -61,19 +61,19 @@ u64 mmu_translate(pml_entry* root, u64 virt_addr)
 
     u64 next_addr = root[pml4_entry_idx].bits.address << PAGE_SHIFT;
 
-    pml_entry* pml3 = mmu_get_mapped(next_addr);
+    pml_entry* pml3 = mmu_to_virt(next_addr);
     if (!pml3[pml3_entry_idx].bits.present) return -2;
     next_addr = pml3[pml3_entry_idx].bits.address << PAGE_SHIFT;
 
     if (pml3[pml3_entry_idx].bits.huge) return (next_addr | (virt_addr & PML3_MASK));
 
-    pml_entry* pml2 = mmu_get_mapped(next_addr);
+    pml_entry* pml2 = mmu_to_virt(next_addr);
     if (!pml2[pml2_entry_idx].bits.present) return -3;
     next_addr = pml2[pml2_entry_idx].bits.address << PAGE_SHIFT;
 
     if (pml2[pml2_entry_idx].bits.huge) return (next_addr | (virt_addr & PML2_MASK));
 
-    pml_entry* pml1 = mmu_get_mapped(next_addr);
+    pml_entry* pml1 = mmu_to_virt(next_addr);
     if (!pml1[pml1_entry_idx].bits.present) return -4;
     next_addr = pml1[pml1_entry_idx].bits.address << PAGE_SHIFT;
 
@@ -93,13 +93,13 @@ pml_entry* mmu_get_page(u64 virt_addr)
 
     if (!current_pml4[pml4_entry_idx].bits.present) return NULL;
 
-    pml_entry* pml3 = mmu_get_mapped(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml3 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
     if (!pml3[pml3_entry_idx].bits.present) return NULL;
 
-    pml_entry* pml2 = mmu_get_mapped(pml3[pml3_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml2 = mmu_to_virt(pml3[pml3_entry_idx].bits.address << PAGE_SHIFT);
     if (!pml2[pml2_entry_idx].bits.present) return NULL;
 
-    pml_entry* pml1 = mmu_get_mapped(pml2[pml2_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml1 = mmu_to_virt(pml2[pml2_entry_idx].bits.address << PAGE_SHIFT);
     return &pml1[pml1_entry_idx];
 }
 
@@ -129,12 +129,12 @@ pml_entry* mmu_get_current_dir()
 
 pml_entry* mmu_get_kernel_dir()
 {
-    return mmu_get_mapped((u64) &high_base_pml4);
+    return mmu_to_virt((u64) &high_base_pml4);
 }
 
 void mmu_set_directory(pml_entry* new)
 {
-    if (!new) new = mmu_get_mapped((u64) &high_base_pml4);
+    if (!new) new = mmu_to_virt((u64) &high_base_pml4);
     current_pml4 = new;
     asm volatile ("movq %0, %%cr3" : : "r" ((u64) new & PHYS_MASK));
 }
@@ -163,15 +163,15 @@ u8 mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out, 
     *pml4_out = &current_pml4[pml4_entry_idx];
     if (!(**pml4_out).bits.present) return 1;
 
-    pml_entry* pml3 = mmu_get_mapped(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml3 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
     *pml3_out = &pml3[pml3_entry_idx];
     if (!(**pml3_out).bits.present) return 1;
 
-    pml_entry* pml2 = mmu_get_mapped(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml2 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
     *pml2_out = &pml2[pml2_entry_idx];
     if (!(**pml2_out).bits.present) return 1;
 
-    pml_entry* pml1 = mmu_get_mapped(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml1 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
     *pml1_out = &pml1[pml1_entry_idx];
     if (!(**pml1_out).bits.present) return 1; // WARN maybe obsolette
 
@@ -242,7 +242,7 @@ void mmu_init(size_t memsize, u64 first_free_page)
         heap_base_pml1[i].full = (first_free_page + (i << 12)) | KERNEL_PML_ACCESS;
 
     // IMPORTANT
-    current_pml4 = mmu_get_mapped((u64) current_pml4);
+    current_pml4 = mmu_to_virt((u64) current_pml4);
 
     frames = (void*) (u64) KERNEL_HEAP_START;
     memset((void*) frames, 0xFF, bytes_of_frames);
@@ -268,4 +268,3 @@ void mmu_init(size_t memsize, u64 first_free_page)
 
     mmu_set_directory(current_pml4);
 }
-

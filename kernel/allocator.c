@@ -54,19 +54,10 @@ void mmu_frame_allocate(pml_entry* page, u64 flags)
 
     u64 idx = mmu_first_frame();
     u64 addr = idx << PAGE_SHIFT;
-    // FIXME handle error here
     mmu_frame_set(addr);
     page->bits.address = addr;
     page->bits.present = 1;
     page->full |= flags;
-}
-// FIXME which to use? ,':/
-// allocate physical page and return it's index
-u64 mmu_allocate_frame()
-{
-    u64 idx = mmu_first_frame();
-    mmu_frame_set(idx << PAGE_SHIFT);
-    return idx;
 }
 
 void mmu_frame_map_address(pml_entry* page, u64 flags, u64 phys_addr)
