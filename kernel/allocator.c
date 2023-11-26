@@ -1,6 +1,6 @@
 #include "allocator.h"
 
-// mark a physical frame as in use
+/* Mark a physical frame as in use */
 void mmu_frame_set(u64 frame_addr)
 {
     if (frame_addr < nframes * PAGE_SIZE) {
@@ -11,7 +11,7 @@ void mmu_frame_set(u64 frame_addr)
     }
 }
 
-// mark a physical frame as available
+/* Mark a physical frame as available */
 void mmu_frame_clear(u64 frame_addr)
 {
     if (frame_addr < nframes * PAGE_SIZE) {
@@ -22,7 +22,7 @@ void mmu_frame_clear(u64 frame_addr)
     }
 }
 
-// determine if a physical frame available
+/* Determine if a physical frame available */
 u32 mmu_frame_test(u64 frame_addr)
 {
     if (!(frame_addr < nframes * PAGE_SIZE)) return 1;
@@ -33,7 +33,7 @@ u32 mmu_frame_test(u64 frame_addr)
     return frames[idx] & ((u32) 1 << off); // WARN perhaps double negation is needed here
 }
 
-// find the first available frame
+/* Find the first available frame */
 u64 mmu_first_frame()
 {
     for (u64 i = 0; i < INDEX_FROM_BIT(nframes); ++i) {
@@ -47,7 +47,6 @@ u64 mmu_first_frame()
     // FIXME wtf should I return? Error handling here
 }
 
-// pretty self-explanatory :/
 void mmu_frame_allocate(pml_entry* page, u64 flags)
 {
     if (page->bits.address != 0) return; // already allocated

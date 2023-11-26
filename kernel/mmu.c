@@ -26,13 +26,13 @@ static size_t total_memory = 0;
 static size_t unavailable_memory = 0;
 
 pml_entry initial_page_tables[3][512] __attribute((aligned(PAGE_SIZE))) = {0};
-// kernel
+/* Kernel */
 pml_entry high_base_pml4[512] __attribute((aligned(PAGE_SIZE))) = {0};
 pml_entry high_base_pml3[512] __attribute((aligned(PAGE_SIZE))) = {0};
 pml_entry high_base_pml2s[64][512] __attribute((aligned(PAGE_SIZE))) = {0};
 pml_entry low_base_pml4s[2][512] __attribute((aligned(PAGE_SIZE))) = {0};
 pml_entry low_base_pml2s[32][512] __attribute((aligned(PAGE_SIZE))) = {0};
-// heap
+/* Heap */
 pml_entry heap_base_pml3[512] __attribute((aligned(PAGE_SIZE))) = {0};
 pml_entry heap_base_pml2[512] __attribute((aligned(PAGE_SIZE))) = {0};
 pml_entry heap_base_pml1[512*3] __attribute((aligned(PAGE_SIZE))) = {0};
@@ -44,9 +44,9 @@ void* mmu_to_virt(u64 phys_addr)
     return (void*) (phys_addr | HIGH_MAP_REGION);
 }
 
-// get the physical address
-// if page is not mapped, a negative value from -1 to -4 returned, which indicates which level
-// of the page directory is unmapped (-1 = no PML4, -4 = no page in PML1)
+/* Get the physical address
+   If page is not mapped, a negative value from -1 to -4 returned, which indicates which level
+   of the page directory is unmapped (-1 = no PML4, -4 = no page in PML1) */
 u64 mmu_to_phys(pml_entry* root, u64 virt_addr)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
@@ -80,7 +80,7 @@ u64 mmu_to_phys(pml_entry* root, u64 virt_addr)
     return (next_addr | (virt_addr & PT_MASK));
 }
 
-// get pml entry for a virtual address
+/* Get pml entry for a virtual address */
 pml_entry* mmu_get_page(u64 virt_addr)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
@@ -103,13 +103,13 @@ pml_entry* mmu_get_page(u64 virt_addr)
     return &pml1[pml1_entry_idx];
 }
 
-// get amount of usable memory in KiB
+/* Get amount of usable memory in KiB */
 size_t mmu_total_memory()
 {
     return total_memory;
 }
 
-// get amount of used memory in KiB
+/* Get amount of used memory in KiB */
 size_t mmu_used_memory()
 {
     size_t used = 0;
@@ -139,11 +139,13 @@ void mmu_set_directory(pml_entry* new)
     asm volatile ("movq %0, %%cr3" : : "r" ((u64) new & PHYS_MASK));
 }
 
+/* Invalidate page */
 void mmu_invalidate(u64 addr)
 {
     asm volatile ("invlpg (%0)" : : "r"(addr));
 }
 
+/* Get page and containing PML entries */
 u8 mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out, pml_entry** pml2_out, pml_entry** pml1_out)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
@@ -173,7 +175,7 @@ u8 mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out, 
 
     pml_entry* pml1 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
     *pml1_out = &pml1[pml1_entry_idx];
-    if (!(**pml1_out).bits.present) return 1; // WARN maybe obsolette
+    if (!(**pml1_out).bits.present) return 1; // WARN maybe unnecessary
 
     return 0;
 }
@@ -241,7 +243,6 @@ void mmu_init(size_t memsize, u64 first_free_page)
     for (size_t i = 0; i < pages_of_frames; ++i)
         heap_base_pml1[i].full = (first_free_page + (i << 12)) | KERNEL_PML_ACCESS;
 
-    // IMPORTANT
     current_pml4 = mmu_to_virt((u64) current_pml4);
 
     frames = (void*) (u64) KERNEL_HEAP_START;

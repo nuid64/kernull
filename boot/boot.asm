@@ -24,24 +24,24 @@ _start:
 
 setup_page_tables:
 extern initial_page_tables
-        mov        edi, initial_page_tables
+        mov        edi, initial_page_tables                    ; P4
 
         ; map first P4 entry to P3 table
         mov        eax, 0x1000                                 ; P3 table offset...
         add        eax, edi                                    ; ... from P4
-        or         eax, 0b11                                   ; present + writeable
-        mov        [edi], eax                                  ; P4[0] = & P3[0] | present | writeable
+        or         eax, 0b11                                   ; PRESENT | WRITABLE
+        mov        [edi], eax                                  ; P4[0] = &P3[0] | PRESENT | WRITABLE
 
         add        edi, 0x1000                                 ; P3
         ; map first P3 entry to P2 table
         mov        eax, 0x1000                                 ; P2 table offset...
         add        eax, edi                                    ; ... from P3
-        or         eax, 0b11                                   ; present + writeable
-        mov        [edi], eax                                  ; P4[0] = & P3[0] | present | writeable
+        or         eax, 0b11                                   ; PRESENT | WRITABLE
+        mov        [edi], eax                                  ; P3[0] = &P2[0] | PRESENT | WRITABLE
 
         ; map 32 2MiB pages to 64MiB of low memory temporarily, until MMU initialization
         add        edi, 0x1000                                 ; P2
-        mov        ebx, 0b10000011                             ; present + writeable + huge
+        mov        ebx, 0b10000011                             ; PRESENT | WRITABLE | HUGE
         mov        ecx, 32
 .set_entry:
         mov        [edi], ebx

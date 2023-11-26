@@ -3,7 +3,7 @@
 #include <kernel/types.h>
 #include "pml.h"
 
-// bitmap page allocator
+/* Bitmap page allocator */
 static volatile u32* frames;
 static u64 nframes;
 
