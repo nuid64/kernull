@@ -4,6 +4,7 @@
 #include "idt.h"
 #include "pit.h"
 #include "mmu.h"
+#include "kmalloc.h"
 
 extern u8* end;
 
@@ -17,4 +18,9 @@ void kmain()
     pit_init();
 
     vga_print("kmain dispatcher is here. Everything is good. Executing protocol \"nuidpocalypse\"\n");
+
+    u64* ph = (u64*) kmalloc(0xFFF);
+    ph = (u64*) kmalloc(8);
+    vga_print_num(*ph);
+    vga_print_num(*ph);
 }

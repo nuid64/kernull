@@ -3,6 +3,7 @@
 #include "pml.h"
 #include "allocator.h"
 #include "idt.h"
+#include "vga_print.h"
 
 #define KERNEL_PML_ACCESS 0x03
 #define USER_PML_ACCESS   0x07
@@ -24,6 +25,8 @@
 
 static size_t total_memory = 0;
 static size_t unavailable_memory = 0;
+
+void page_fault(struct regs* r);
 
 pml_entry initial_page_tables[3][512] __attribute((aligned(PAGE_SIZE))) = {0};
 /* Kernel */
@@ -235,13 +238,15 @@ void mmu_init(size_t memsize, u64 first_free_page)
     u64 pages_of_frames = bytes_of_frames >> PAGE_SHIFT;
 
     // setup heap
-    heap_base_pml3[0].full = (u64) &heap_base_pml2      | KERNEL_PML_ACCESS;
+    heap_base_pml3[0].full = (u64) &heap_base_pml2       | KERNEL_PML_ACCESS;
     heap_base_pml2[0].full = (u64) &heap_base_pml1[0]    | KERNEL_PML_ACCESS;
     heap_base_pml2[1].full = (u64) &heap_base_pml1[512]  | KERNEL_PML_ACCESS;
     heap_base_pml2[2].full = (u64) &heap_base_pml1[1024] | KERNEL_PML_ACCESS;
 
     for (size_t i = 0; i < pages_of_frames; ++i)
         heap_base_pml1[i].full = (first_free_page + (i << 12)) | KERNEL_PML_ACCESS;
+
+    irq_set_handler(0x0E, (int_handler) page_fault);
 
     current_pml4 = mmu_to_virt((u64) current_pml4);
 
@@ -268,4 +273,62 @@ void mmu_init(size_t memsize, u64 first_free_page)
         mmu_frame_set(i);
 
     mmu_set_directory(current_pml4);
+}
+
+void page_fault(struct regs* r) {
+    u64 fault_addr;
+    asm (
+        "mov %%cr2, %0"
+        : "=r" (fault_addr)
+    );
+
+    struct page_fault_err* err = (struct page_fault_err*) &r->err_code;
+
+    // fuck
+    vga_print("Page fault at address ");
+    vga_print_num(fault_addr);
+    vga_print("\n");
+
+    // why
+    vga_print("Cause: ");
+    if (!err->present) {
+        vga_print("Page is not present ");
+    }
+    if (err->reserved_set) {
+        vga_print("Reserved bit set");
+    }
+    if (err->prot_key_viol) {
+        vga_print("Protection-key violation");
+    }
+    if (err->shadow_stack_acc) {
+        vga_print("Shadow-stack access ");
+    }
+    if (err->sgx_viol) {
+        vga_print("SGX violation");
+    }
+    vga_print("\n");
+
+    // when
+    vga_print("On: ");
+    if (err->instruction_fetch) {
+        vga_print("Instruction fetch");
+    } else {
+        vga_print("Data ");
+        if (err->write) {
+            vga_print("write");
+        } else {
+            vga_print("read");
+        }
+    }
+    vga_print("\n");
+
+    // blame
+    vga_print("Blame: ");
+    if (err->user) {
+        vga_print("User"); // well, actually we can't blame any user at this point. Bummer
+    } else {
+        vga_print("Kernel");
+    }
+
+    asm volatile ("cli; hlt");
 }

@@ -7,7 +7,7 @@ extern void idt_load(u64 idtr);
 
 static idtr IDTR;
 static idt_entry IDT[256];
-static irq_routine irq_handlers[256];
+static int_handler irq_handlers[256];
 
 void init_idt()
 {
@@ -83,16 +83,17 @@ void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs)
     IDT[idx].attrs.full    = attrs;
 };
 
-void irq_set_handler(u8 irq, irq_routine handler)
+void irq_set_handler(u8 irq, int_handler handler)
 {
     irq_handlers[irq] = handler;
 }
 
-// FIXME dummy for now
-#include "vga_print.h"
 struct regs* isr_handler(struct regs* r)
 {
-    vga_print("received interrupt\n");
+    if (irq_handlers[r->int_no]) {
+        int_handler handler = irq_handlers[r->int_no];
+        handler(r);
+    }
     
     return r;
 }
@@ -105,9 +106,8 @@ struct regs* irq_handler(struct regs* r)
     }
     outb(0x20, 0x20); // to master
 
-    if (irq_handlers[r->int_no])
-    {
-        irq_routine handler = irq_handlers[r->int_no];
+    if (irq_handlers[r->int_no]) {
+        int_handler handler = irq_handlers[r->int_no];
         handler(r);
     }
 
