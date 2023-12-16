@@ -5,7 +5,7 @@ SECTIONS {
     . = 1M;
     phys = .;
 
-    .code BLOCK(4K) : ALIGN(4K)
+    .code : ALIGN(4K)
     {
         *(.multiboot)
         *(.bootstrap)
@@ -13,19 +13,19 @@ SECTIONS {
         *(.code)
     }
 
-    .rodata BLOCK(4K) : ALIGN(4K)
+    .rodata : ALIGN(4K)
     {
         *(.rodata)
     }
 
-    .data BLOCK(4K) : ALIGN(4K)
+    .data : ALIGN(4K)
     {
         data = .;
         *(.data)
         *(.symbols)
     }
 
-    .bss BLOCK(4K) : ALIGN(4K)
+    .bss : ALIGN(4K)
     {
         bss = .;
         *(COMMON)

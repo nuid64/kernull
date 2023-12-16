@@ -18,7 +18,7 @@ kernel: $(ASM_OBJ) $(C_OBJ)
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(shell dirname $@)
-	@x86_64-elf-gcc $(CFLAGS) $(CINCLUDES) -c $< -o $@
+	@clang --target=x86_64-elf $(CFLAGS) $(CINCLUDES) -c $< -o $@
 
 $(BUILD)/%.o: %.asm
 	@mkdir -p $(shell dirname $@)

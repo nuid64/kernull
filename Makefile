@@ -38,4 +38,4 @@ $(ISO): $(KERNEL) $(GRUB_CFG)
 $(KERNEL): $(LINKER_SCRIPT)
 	$(MAKE) -C boot -s
 	$(MAKE) -C kernel -s
-	x86_64-elf-ld $(LDFLAGS) -o $(KERNEL) $(OBJ)
+	@ld.lld -m elf_x86_64 $(LDFLAGS) -o $(KERNEL) $(OBJ)
