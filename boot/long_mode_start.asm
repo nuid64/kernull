@@ -12,8 +12,8 @@ long_mode_start:
         mov        fs, ax
         mov        gs, ax
 
-        cli
-
+        pop        rdi                                         ; multiboot2 info
+        pop        rsi                                         ; multiboot2 magic
         call       kmain
 
 halt:

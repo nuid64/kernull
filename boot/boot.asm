@@ -9,6 +9,11 @@ global _start
 _start:
         mov        esp, stack_top
 
+        push       0                                          ; to pop in 64-bit register
+        push       eax                                        ; multiboot2 magic
+        push       0                                          ; to pop in 64-bit register
+        push       ebx                                        ; multiboot2 info
+
         ; some checks
         call       multiboot_check
         call       cpuid_check

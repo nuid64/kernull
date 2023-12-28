@@ -8,7 +8,7 @@
 
 extern u8* end;
 
-void kmain()
+void kmain(void* mb_info, u32 mb_magic)
 {
     vga_terminal_initialize();
 
@@ -19,8 +19,7 @@ void kmain()
 
     vga_print("kmain dispatcher is here. Everything is good. Executing protocol \"nuidpocalypse\"\n");
 
-    u64* ph = (u64*) kmalloc(0xFFF);
-    ph = (u64*) kmalloc(8);
-    vga_print_num(*ph);
-    vga_print_num(*ph);
+    vga_print("The answer to all questions is: ");
+    vga_print_num((u64) mb_magic);
+    vga_print("\n");
 }
