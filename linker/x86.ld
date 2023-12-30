@@ -7,7 +7,7 @@ SECTIONS {
 
     .code : ALIGN(4K)
     {
-        *(.multiboot)
+        *(.multiboot_header)
         *(.bootstrap)
         code = .;
         *(.code)
