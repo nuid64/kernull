@@ -1,8 +1,8 @@
-#include <kernel/types.h>
+#include <kernull/types.h>
 #include "kmalloc.h"
-#include "mmu.h"
+// #include "mmu.h"
 
-u64 placement_address = KERNEL_HEAP_START;
+u64 placement_address = 1;//KERNEL_HEAP_START;
 
 u64 kmalloc(u64 size)
 {
