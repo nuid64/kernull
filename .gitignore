@@ -1,4 +1,4 @@
 build
-isodir/kernull.iso
-isodir/boot/kernull.bin
+isodir/kernull*
+isodir/boot/kernull*
 compile_flags.txt
