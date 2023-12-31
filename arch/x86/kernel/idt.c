@@ -1,15 +1,15 @@
-#include <asm/x86.h>
-#include "idt.h"
-#include "regs.h"
-#include "pic.h"
-
-extern void idt_load(u64 idtr);
+#include <kernel/types.h>
+#include <arch/x86/asm.h>
+#include <arch/x86/regs.h>
+#include <arch/x86/segment_selector.h>
+#include <arch/x86/pic.h>
+#include <arch/x86/idt.h>
 
 static idtr IDTR;
 static idt_entry IDT[256];
 static int_handler irq_handlers[256];
 
-void init_idt()
+void idt_init()
 {
     pic_remap();
 
@@ -66,10 +66,7 @@ void init_idt()
     idt_set_gate(46, (u64) irq14, 0x08, 0, 0x8E);
     idt_set_gate(47, (u64) irq15, 0x08, 0, 0x8E);
 
-    asm volatile (
-        "lidt %0"
-        : : "m"(IDTR)
-	);
+    lidt((u64) &IDTR);
 }
 
 void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs)

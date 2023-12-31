@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernull/types.h>
+#include <kernel/types.h>
 
 u64 kmalloc(u64 size);
 u64 kmalloc_a(u64 size); /* Page aligned */

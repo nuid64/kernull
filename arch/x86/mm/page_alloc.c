@@ -1,4 +1,5 @@
-#include "page_alloc.h"
+#include <kernel/types.h>
+#include <kernel/page_alloc.h>
 
 /* Mark a physical frame as in use */
 void mmu_frame_set(u64 frame_addr)
@@ -30,7 +31,7 @@ u32 mmu_frame_test(u64 frame_addr)
     u64 frame = frame_addr >> PAGE_SHIFT;
     u64 idx = INDEX_FROM_BIT(frame);
     u64 off = OFFSET_FROM_BIT(frame);
-    return frames[idx] & ((u32) 1 << off); // WARN perhaps double negation is needed here
+    return frames[idx] & ((u32) 1 << off); // WARN: perhaps double negation is needed here
 }
 
 /* Find the first available frame */
@@ -44,7 +45,7 @@ u64 mmu_first_frame()
                 return (i << 5) + j;
         }
     }
-    // FIXME wtf should I return? Error handling here
+    // FIXME: wtf should I return? Error handling here
 }
 
 void mmu_frame_allocate(u64 flags)

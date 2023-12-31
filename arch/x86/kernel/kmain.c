@@ -1,9 +1,9 @@
-#include "vga_print.h"
+#include <kernel/vga_print.h>
 
 extern u8* end; /* End of kernel code */
 
-extern void init_gdt();
-extern void init_idt();
+extern void gdt_init();
+extern void idt_init();
 extern void mmu_init(size_t memsize, u64 first_free_page);
 extern void pit_init();
 
@@ -11,8 +11,8 @@ void kmain(void* mb_info, u32 mb_magic)
 {
     vga_terminal_initialize();
 
-    init_gdt();
-    init_idt();
+    gdt_init();
+    idt_init();
     mmu_init(64*1024, (u64) &end);
     pit_init();
 

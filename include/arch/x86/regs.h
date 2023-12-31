@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernull/types.h>
+#include <kernel/types.h>
 
 struct regs {
     // pushed by isr_common

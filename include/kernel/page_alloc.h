@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernull/types.h>
+#include <kernel/types.h>
 
 #define INDEX_FROM_BIT(b) ((b) >> 5)
 #define OFFSET_FROM_BIT(b) ((b) & 0x1F)

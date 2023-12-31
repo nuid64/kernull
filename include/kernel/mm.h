@@ -1,6 +1,9 @@
 #pragma once
 
-#include "pml.h"
+/* INFO: Yes. Including arch-dependent code in (wannabe)arch-independent header.
+ * Only x86 is supported at the time. Fuck off.
+ */
+#include <arch/x86/pml.h>
 
 #define KERNEL_HEAP_START  0xFFFFFF0000000000
 #define KERNEL_STACK_SIZE  256 * 1024
@@ -30,20 +33,6 @@ void       mmu_set_directory(pml_entry* new);
 void       mmu_invalidate(u64 addr);
 u8         mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out,
                              pml_entry** pml2_out, pml_entry** pml1_out);
-void*      memset(void* dest, int c, size_t n); // FIXME move it out?
+void*      memset(void* dest, int c, size_t n); // FIXME: move it out?
 size_t     mmu_total_memory();
 size_t     mmu_used_memory();
-
-/* Page fault error code structure */
-struct page_fault_err {
-    // using u64 here because error code is qword
-    u64 present           : 1; /* Present */
-    u64 write             : 1; /* Read/Write */
-    u64 user              : 1; /* Supervisor/User */
-    u64 reserved_set      : 1; /* Reserved bit was set */
-    u64 instruction_fetch : 1; /* Data access/Instruction fetch */
-    u64 prot_key_viol     : 1; /* Protection-key violation */
-    u64 shadow_stack_acc  : 1; /* Shadow-stack access */
-    u64 _padding          : 8;
-    u64 sgx_viol          : 1; /* SGX violation */
-};

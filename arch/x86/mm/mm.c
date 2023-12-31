@@ -1,9 +1,11 @@
-#include <kernull/types.h>
-#include "mm.h"
-#include "pml.h"
-#include "page_alloc.h"
-#include "../kernel/idt.h"
-#include "../kernel/vga_print.h"
+#include <kernel/types.h>
+#include <kernel/mm.h>
+#include <kernel/page_alloc.h>
+#include <kernel/vga_print.h>
+#include <arch/x86/asm.h>
+#include <arch/x86/idt.h>
+#include <arch/x86/regs.h>
+#include <arch/x86/pml.h>
 
 #define KERNEL_PML_ACCESS 0x03
 #define USER_PML_ACCESS   0x07
@@ -140,13 +142,13 @@ void mmu_set_directory(pml_entry* new)
 {
     if (!new) new = mmu_to_virt((u64) &high_base_pml4);
     current_pml4 = new;
-    asm volatile ("movq %0, %%cr3" : : "r" ((u64) new & PHYS_MASK));
+    set_cr3((u64) new & PHYS_MASK);
 }
 
 /* Invalidate page */
 void mmu_invalidate(u64 addr)
 {
-    asm volatile ("invlpg (%0)" : : "r"(addr));
+    invlpg(addr);
 }
 
 /* Get page and containing PML entries */
@@ -188,7 +190,7 @@ extern u8* end;
 
 void* memset(void* dest, int c, size_t n)
 {
-    asm volatile (
+    asm (
         "cld; rep stosb"
         : "=c"((int){0})
         : "rdi"(dest), "a"(c), "c"(n)
@@ -276,12 +278,22 @@ void mmu_init(size_t memsize, u64 first_free_page)
     mmu_set_directory(current_pml4);
 }
 
+/* Page fault error code structure */
+struct page_fault_err {
+    // using u64 here because error code is qw
+    u64 present           : 1; /* Present */
+    u64 write             : 1; /* Read/Write */
+    u64 user              : 1; /* Supervisor/User */
+    u64 reserved_set      : 1; /* Reserved bit was set */
+    u64 instruction_fetch : 1; /* Data access/Instruction fetch */
+    u64 prot_key_viol     : 1; /* Protection-key violation */
+    u64 shadow_stack_acc  : 1; /* Shadow-stack access */
+    u64 _padding          : 8; 
+    u64 sgx_viol          : 1; /* SGX violation */
+};
+
 void page_fault(struct regs* r) {
-    u64 fault_addr;
-    asm (
-        "mov %%cr2, %0"
-        : "=r" (fault_addr)
-    );
+    u64 fault_addr = get_cr2();
 
     struct page_fault_err* err = (struct page_fault_err*) &r->err_code;
 
@@ -331,5 +343,5 @@ void page_fault(struct regs* r) {
         vga_print("Kernel");
     }
 
-    asm volatile ("cli; hlt");
+    asm ("cli; hlt");
 }

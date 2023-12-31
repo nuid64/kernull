@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernull/types.h>
+#include <kernel/types.h>
 
 union segment_selector {
     struct {
