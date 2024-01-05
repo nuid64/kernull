@@ -18,5 +18,5 @@ typedef union {
         u64 _available1 : 11; /* Available */
         u64 noexec      : 1;  /* Forbid executing code on this page. NXE bit in EFER must be set */
     } bits;
-    u32 full;
+    u64 full;
 } pml_entry; /* Page Map Level entry */

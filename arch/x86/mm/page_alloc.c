@@ -1,5 +1,5 @@
-#include <kernel/types.h>
 #include <kernel/page_alloc.h>
+#include <kernel/types.h>
 
 /* Mark a physical frame as in use */
 void mmu_frame_set(u64 frame_addr)
@@ -48,7 +48,21 @@ u64 mmu_first_frame()
     // FIXME: wtf should I return? Error handling here
 }
 
-void mmu_frame_allocate(u64 flags)
+void mmu_frame_allocate(pml_entry* page, u64 flags)
 {
-    // TODO: Allocate :]
+    if (page->bits.address != 0) return; // already allocated
+
+    u64 idx = mmu_first_frame();
+    u64 addr = idx << PAGE_SHIFT;
+    mmu_frame_set(addr);
+    page->bits.address = addr;
+    page->bits.present = 1;
+    page->full |= flags;
+}
+
+void mmu_frame_map_address(pml_entry* page, u64 flags, u64 phys_addr)
+{
+    mmu_frame_set(phys_addr);
+    page->bits.address = phys_addr >> PAGE_SHIFT;
+    mmu_frame_allocate(page, flags);
 }

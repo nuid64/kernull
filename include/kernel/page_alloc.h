@@ -1,6 +1,7 @@
 #pragma once
 
 #include <kernel/types.h>
+#include <arch/x86/pml.h>
 
 #define INDEX_FROM_BIT(b) ((b) >> 5)
 #define OFFSET_FROM_BIT(b) ((b) & 0x1F)
@@ -16,4 +17,4 @@ void mmu_frame_set(u64 frame_addr);
 void mmu_frame_clear(u64 frame_addr);
 u32 mmu_frame_test(u64 frame_addr);
 u64 mmu_first_frame();
-void mmu_frame_allocate(u64 flags);
+void mmu_frame_allocate(pml_entry* page, u64 flags);

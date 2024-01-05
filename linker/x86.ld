@@ -33,5 +33,5 @@ SECTIONS {
         *(.stack)
     }
 
-    end = .;
+    kernel_end = .;
 }

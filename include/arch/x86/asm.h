@@ -28,14 +28,6 @@ inline void set_cr3(u64 value)
     );
 }
 
-inline void lidt(u64 idtr)
-{
-    asm (
-        "lidt %0"
-        : : "m"(idtr)
-	);
-}
-
 inline u8 inb(u64 port)
 {
     u8 rv;
@@ -91,4 +83,30 @@ inline void outl(u64 port, u32 data)
         "outl %%eax, %%dx"
         : : "dN" (port), "a" (data)
     );
+}
+
+inline u32 popcntl(u32 value)
+{
+    // TODO: use popcnt instruction, if available
+    u32 odd = value & 0x55555555;
+    u32 evn = value & 0xAAAAAAAA;
+    value = odd + (evn >> 1);
+
+    odd = value & 0x33333333;
+    evn = value & 0xCCCCCCCC;
+    value = odd + (evn >> 2);
+
+    odd = value & 0x0F0F0F0F;
+    evn = value & 0xF0F0F0F0;
+    value = odd + (evn >> 4);
+
+    odd = value & 0x00FF00FF;
+    evn = value & 0xFF00FF00;
+    value = odd + (evn >> 8);
+
+    odd = value & 0x0000FFFF;
+    evn = value & 0xFFFF0000;
+    value = odd + (evn >> 16);
+
+    return value;
 }
