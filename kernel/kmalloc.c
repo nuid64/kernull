@@ -2,7 +2,7 @@
 #include <kernel/kmalloc.h>
 #include <kernel/mm.h>
 
-u64 placement_address = KERNEL_HEAP_START;
+u64 placement_address;
 
 u64 kmalloc(u64 size)
 {

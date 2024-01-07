@@ -247,6 +247,10 @@ void mmu_init(size_t memsize, u64 kernel_end)
     for (size_t i = 0; i < pages_of_frames; ++i)
         heap_base_pml1[i].full = ((first_free_page + (i << 12))) | KERNEL_PML_ACCESS;
 
+    // adjust heap allocator's start address
+    extern u64 placement_address;
+    placement_address = KERNEL_HEAP_START + (PAGE_SIZE * pages_of_frames);
+
     // Transition into illusory realm T.T
     mmu_set_directory(current_pml4);
     current_pml4 = mmu_to_virt((u64) current_pml4);
