@@ -93,12 +93,14 @@ void page_alloc(pml_entry* page, u64 flags)
     page->bits.address = addr;
     page->bits.present = 1;
     page->full |= flags;
+    ++unavailable_memory;
 }
 
 void page_free(pml_entry* page)
 {
     page->bits.address = 0; // prevent use after free
     frame_clear(page->bits.address);
+    --unavailable_memory;
 }
 
 /* Get amount of usable memory in KiB */
@@ -110,14 +112,7 @@ size_t get_total_memory()
 /* Get amount of used memory in KiB */
 size_t get_used_memory()
 {
-    size_t used = 0;
-    for (u64 i = 0; i < INDEX_FROM_BIT(nframes); ++i)
-        for (u64 j = 0; j < 32; ++j) {
-            u32 bit = 1 << j;
-            if (frames[i] & bit)
-                ++used;
-        }
-    return used * 4 - unavailable_memory;
+    return unavailable_memory;
 }
 
 /* Get the amount of pages required for the metadata for this memory size */
