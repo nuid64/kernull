@@ -1,5 +1,5 @@
-#include <kernel/types.h>
 #include <kernel/kmalloc.h>
+#include <kernel/types.h>
 #include <kernel/mm.h>
 
 u64 placement_address;

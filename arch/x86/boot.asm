@@ -9,7 +9,9 @@ global _start
 _start:
         mov        esp, stack_top
 
-; TODO: move multiboot info to some safe place
+; TODO: Move Multiboot2 info to a known place
+;       to avoid corruption and to free that memory after
+
         push       0                                          ; to pop in 64-bit register
         push       eax                                        ; multiboot2 magic
         push       0                                          ; to pop in 64-bit register

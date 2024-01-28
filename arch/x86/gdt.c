@@ -31,7 +31,7 @@ typedef struct {
     u16 base_low;            /* Segment's beginning address */
     u8  base_middle;
     union gdt_access access; /* Access byte */
-    union gdt_flags flags;   /* WARN: Limit's bits 16-20 stored in flags' least 4 bits */
+    union gdt_flags flags;   /* WARN: Limit's bits 16-19 stored in flags' least 4 bits */
     u8 base_high;
 } gdt_entry;
 

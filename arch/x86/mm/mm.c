@@ -14,12 +14,6 @@
 #define CANONICAL_MASK 0x0000FFFFFFFFFFFF
 #define PHYS_MASK      0x0000007FFFFFFFFF
 
-#define PAGE_SIZE         0x1000
-#define LARGE_PAGE_SIZE 0x200000
-#define PAGE_SIZE_MASK 0xFFFFFFFFFFFFF000
-#define PAGE_LOW_MASK  0x0000000000000FFF
-#define PAGE_SHIFT 12
-
 #define PML3_MASK  0x3FFFFFFF
 #define PML2_MASK    0x1FFFFF
 #define PT_MASK  PAGE_LOW_MASK
@@ -181,7 +175,7 @@ u8 mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out, 
 
     pml_entry* pml1 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
     *pml1_out = &pml1[pml1_entry_idx];
-    if (!(**pml1_out).bits.present) return 1; // WARN maybe unnecessary
+    if (!(**pml1_out).bits.present) return 1; // WARN: Maybe it's unnecessary
 
     return 0;
 }
@@ -201,11 +195,11 @@ void mmu_init(size_t memsize, u64 kernel_end)
 {
     current_pml4 = high_base_pml4;
 
-    // map high base PML3
+    /* Map high base PML3 */
     high_base_pml4[511].full = (u64) &high_base_pml3 | KERNEL_PML_ACCESS;
     high_base_pml4[510].full = (u64) &heap_base_pml3 | KERNEL_PML_ACCESS;
 
-    // identity map from 0xFFFFFFE000000000
+    /* Identity map from 0xFFFFFFE000000000 */
     for (u64 i = 0; i < 64; ++i) {
         high_base_pml3[i].full = (u64) &high_base_pml2s[i] | KERNEL_PML_ACCESS;
         for (u64 j = 0; j < 512; ++j) {
@@ -213,10 +207,10 @@ void mmu_init(size_t memsize, u64 kernel_end)
        }
     }
 
-    // map low base
+    /* Map low base */
     low_base_pml4s[0][0].full = (u64) &low_base_pml4s[1] | USER_PML_ACCESS;
 
-    // map kernel space
+    /* Map kernel space */
     u64 end_pml1r = ((u64) &kernel_end + PAGE_LOW_MASK) & PAGE_SIZE_MASK; // N bytes
     u64 low_pages = end_pml1r >> PAGE_SHIFT;                       // N pages
     low_pages = (low_pages + PAGE_LOW_MASK) & ~PAGE_LOW_MASK;      // round up a page
@@ -226,19 +220,19 @@ void mmu_init(size_t memsize, u64 kernel_end)
         for (int i = 0; i < 512; ++i)
             low_base_pml2s[j][i].full = (u64) (LARGE_PAGE_SIZE * j + PAGE_SIZE * i) | KERNEL_PML_ACCESS;
     }
-    // unmap null
+    /* Unmap null */
     low_base_pml2s[0][0].full = 0;
 
-    // map new low base
+    /* Map new low base */
     high_base_pml4[0].full = (u64) &low_base_pml4s[0] | USER_PML_ACCESS;
 
-    // setup bitmap allocator
+    /* Setup page allocator */
     nframes = (memsize >> PAGE_SHIFT);
     u64 bytes_of_frames = INDEX_FROM_BIT(nframes);
     u64 first_free_page = (kernel_end + PAGE_LOW_MASK) & PAGE_SIZE_MASK;
     u64 pages_of_frames = ((bytes_of_frames + PAGE_LOW_MASK) & PAGE_SIZE_MASK) >> PAGE_SHIFT;
 
-    // setup heap for allocator
+    /* Setup heap for allocator */
     heap_base_pml3[0].full = (u64) &heap_base_pml2       | KERNEL_PML_ACCESS;
     heap_base_pml2[0].full = (u64) &heap_base_pml1[0]    | KERNEL_PML_ACCESS;
     heap_base_pml2[1].full = (u64) &heap_base_pml1[512]  | KERNEL_PML_ACCESS;
@@ -247,21 +241,22 @@ void mmu_init(size_t memsize, u64 kernel_end)
     for (size_t i = 0; i < pages_of_frames; ++i)
         heap_base_pml1[i].full = ((first_free_page + (i << 12))) | KERNEL_PML_ACCESS;
 
-    // adjust heap allocator's start address
+    /* Adjust heap allocator's start address */
     extern u64 placement_address;
     placement_address = KERNEL_HEAP_START + (PAGE_SIZE * pages_of_frames);
 
-    // Transition into illusory realm T.T
+    /* Transition into illusory realm T.T */
     mmu_set_directory(current_pml4);
     current_pml4 = mmu_to_virt((u64) current_pml4);
 
-    frames = (void*) (u64) KERNEL_HEAP_START;
-    memset((void*) frames, 0x00, bytes_of_frames);
-    // TODO: mark unavailable memory provided via Multiboot2
-
+    /* Set PAGE_FAULT handler */
     irq_set_handler(0x0E, (int_handler) page_fault);
 
-    // mark everything as in use
+    /* Mark memory for page allocator */
+    frames = (void*) (u64) KERNEL_HEAP_START;
+    memset((void*) frames, 0x00, bytes_of_frames);
+    // TODO: Mark unavailable memory provided via Multiboot2
+
     for (size_t i = 0; i < first_free_page + bytes_of_frames; i += PAGE_SIZE)
         mmu_frame_set(i);
 
@@ -276,7 +271,8 @@ void mmu_init(size_t memsize, u64 kernel_end)
 
 /* Page fault error code structure */
 struct page_fault_err {
-    // using u64 here because error code is qw
+    // using u64 here because error code is quadword
+
     u64 present           : 1; /* Present */
     u64 write             : 1; /* Read/Write */
     u64 user              : 1; /* Supervisor/User */

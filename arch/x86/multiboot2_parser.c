@@ -7,7 +7,7 @@ struct multiboot_tag* multiboot_find_tag(struct multiboot_tag* tags, u32 tag_typ
         if (tags->type == tag_type)
             return tags;
         else 
-            // HINT: pointer arithmetics, fuckuuuuzzzzz
+            // HINT: Pointer arithmetics, fuckuuuuzzzzz
             tags = (struct multiboot_tag*) ((u8*) tags + ((tags->size + 7) & ~7));
     }
 

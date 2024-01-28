@@ -19,8 +19,11 @@
 #define MMU_FLAG_GLOBAL       0x100
 #define MMU_FLAG_NOEXECUTE    0x8000000000000000
 
-#define MMU_PTR_NULL  1
-#define MMU_PTR_WRITE 2
+#define PAGE_SIZE         0x1000
+#define LARGE_PAGE_SIZE 0x200000
+#define PAGE_SIZE_MASK 0xFFFFFFFFFFFFF000
+#define PAGE_LOW_MASK  0x0000000000000FFF
+#define PAGE_SHIFT 12
 
 void       mmu_init(size_t memsize, u64 first_free_page);
 
@@ -33,6 +36,6 @@ void       mmu_set_directory(pml_entry* new);
 void       mmu_invalidate(u64 addr);
 u8         mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out,
                              pml_entry** pml2_out, pml_entry** pml1_out);
-void*      memset(void* dest, int c, size_t n); // FIXME: move it out?
+void*      memset(void* dest, int c, size_t n); // TODO: Make string.h for such things
 size_t     mmu_total_memory();
 size_t     mmu_used_memory();
