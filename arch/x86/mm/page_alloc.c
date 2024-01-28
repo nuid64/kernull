@@ -98,8 +98,8 @@ void page_alloc(pml_entry* page, u64 flags)
 
 void page_free(pml_entry* page)
 {
-    page->bits.address = 0; // prevent use after free
     frame_clear(page->bits.address);
+    page->bits.address = 0; // prevent use after free
     --unavailable_memory;
 }
 
