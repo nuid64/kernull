@@ -19,9 +19,6 @@
 #define PT_MASK  PAGE_LOW_MASK
 #define ENTRY_MASK      0x1FF
 
-static size_t total_memory = 0;
-static size_t unavailable_memory = 0;
-
 void page_fault(struct regs* r);
 
 #define TABLE_ATTRIBUTE __attribute((aligned(PAGE_SIZE)))
@@ -104,22 +101,15 @@ pml_entry* mmu_get_page(u64 virt_addr)
 }
 
 /* Get amount of usable memory in KiB */
-size_t mmu_total_memory()
+size_t mmu_get_total_memory()
 {
-    return total_memory;
+    return get_total_memory();
 }
 
 /* Get amount of used memory in KiB */
-size_t mmu_used_memory()
+size_t mmu_get_used_memory()
 {
-    size_t used = 0;
-    for (u64 i = 0; i < INDEX_FROM_BIT(nframes); ++i)
-        for (u64 j = 0; j < 32; ++j) {
-            u32 bit = 1 << j;
-            if (frames[i] & bit)
-                ++used;
-        }
-    return used * 4 - unavailable_memory;
+    return get_used_memory();
 }
 
 pml_entry* mmu_get_current_dir()
@@ -226,47 +216,31 @@ void mmu_init(size_t memsize, u64 kernel_end)
     /* Map new low base */
     high_base_pml4[0].full = (u64) &low_base_pml4s[0] | USER_PML_ACCESS;
 
-    /* Setup page allocator */
-    nframes = (memsize >> PAGE_SHIFT);
-    u64 bytes_of_frames = INDEX_FROM_BIT(nframes);
-    u64 first_free_page = (kernel_end + PAGE_LOW_MASK) & PAGE_SIZE_MASK;
-    u64 pages_of_frames = ((bytes_of_frames + PAGE_LOW_MASK) & PAGE_SIZE_MASK) >> PAGE_SHIFT;
+    /* Transition into illusory realm T.T */
+    mmu_set_directory(current_pml4);
+    current_pml4 = mmu_to_virt((u64) current_pml4);
 
-    /* Setup heap for allocator */
+    /* Setup heap for page allocator */
     heap_base_pml3[0].full = (u64) &heap_base_pml2       | KERNEL_PML_ACCESS;
     heap_base_pml2[0].full = (u64) &heap_base_pml1[0]    | KERNEL_PML_ACCESS;
     heap_base_pml2[1].full = (u64) &heap_base_pml1[512]  | KERNEL_PML_ACCESS;
     heap_base_pml2[2].full = (u64) &heap_base_pml1[1024] | KERNEL_PML_ACCESS;
 
-    for (size_t i = 0; i < pages_of_frames; ++i)
+    u64 first_free_page = (kernel_end + PAGE_LOW_MASK) & PAGE_SIZE_MASK;
+    u64 metadata_bytes = metadata_size(memsize);
+    u64 metadata_pages = ((metadata_bytes + PAGE_LOW_MASK) & PAGE_SIZE_MASK) >> PAGE_SHIFT;
+    for (size_t i = 0; i < metadata_pages; ++i)
         heap_base_pml1[i].full = ((first_free_page + (i << 12))) | KERNEL_PML_ACCESS;
+
+    /* Setup page allocator */
+    page_allocator_init(first_free_page, memsize);
 
     /* Adjust heap allocator's start address */
     extern u64 placement_address;
-    placement_address = KERNEL_HEAP_START + (PAGE_SIZE * pages_of_frames);
-
-    /* Transition into illusory realm T.T */
-    mmu_set_directory(current_pml4);
-    current_pml4 = mmu_to_virt((u64) current_pml4);
+    placement_address = KERNEL_HEAP_START + (PAGE_SIZE * metadata_pages);
 
     /* Set PAGE_FAULT handler */
     irq_set_handler(0x0E, (int_handler) page_fault);
-
-    /* Mark memory for page allocator */
-    frames = (void*) (u64) KERNEL_HEAP_START;
-    memset((void*) frames, 0x00, bytes_of_frames);
-    // TODO: Mark unavailable memory provided via Multiboot2
-
-    for (size_t i = 0; i < first_free_page + bytes_of_frames; i += PAGE_SIZE)
-        mmu_frame_set(i);
-
-    size_t unavail = 0;
-    for (size_t i = 0; i < INDEX_FROM_BIT(nframes); ++i)
-        unavail += popcntl(frames[i]);
-    size_t avail = nframes - unavail;
-
-    total_memory = avail * PAGE_SIZE;
-    unavailable_memory = unavail * PAGE_SIZE;
 }
 
 /* Page fault error code structure */
