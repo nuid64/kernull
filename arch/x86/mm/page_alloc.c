@@ -3,33 +3,34 @@
 #include <kernel/mm.h>
 #include "arch/x86/asm.h"
 #include "arch/x86/pml.h"
+#include "kernel/vga_print.h"
 
-#define INDEX_FROM_BIT(b) ((b) >> 5)
-#define OFFSET_FROM_BIT(b) ((b) & 0x1F)
+#define BITMAP_INDEX(b) ((b) >> 3)
+#define BITMAP_OFFSET(b) ((b) & 0x07)
 
 /* Bitmap page allocator */
-static volatile u32* frames;
+static volatile u8* frames;
 static u32 nframes;
 
 static size_t total_memory = 0;
 static size_t unavailable_memory = 0;
 
+void frame_set(u64 frame_addr);
+
 /* Initialize page allocator. Returns number of pages it requires */
 void page_allocator_init(u64 first_free_page, u64 memsize) {
     nframes = (memsize >> PAGE_SHIFT);
-    u64 metadata_bytes = nframes >> sizeof(*frames);
+    u64 metadata_bytes = nframes / (sizeof(*frames) * 8);
 
     /* Mark memory for page allocator */
-    frames = (void*) (u64) KERNEL_HEAP_START;
+    frames = (void*) KERNEL_HEAP_START;
     memset((void*) frames, 0x00, metadata_bytes);
     // TODO: Mark unavailable memory areas when start using all available memory regions
 
-    for (size_t i = 0; i < first_free_page + metadata_bytes; i += PAGE_SIZE)
-        frame_set(i);
-
     size_t unavail = 0;
-    for (size_t i = 0; i < INDEX_FROM_BIT(nframes); ++i)
-        unavail += popcntl(frames[i]);
+    for (; unavail < first_free_page + metadata_bytes; unavail += PAGE_SIZE)
+        frame_set(unavail);
+
     size_t avail = nframes - unavail;
 
     total_memory = avail * PAGE_SIZE;
@@ -41,9 +42,9 @@ void frame_set(u64 frame_addr)
 {
     if (frame_addr < nframes * PAGE_SIZE) {
         u64 frame = frame_addr >> PAGE_SHIFT;
-        u64 idx = INDEX_FROM_BIT(frame);
-        u32 off = OFFSET_FROM_BIT(frame);
-        frames[idx] |= ((u32) 1 << off);
+        u64 idx = BITMAP_INDEX(frame);
+        u8 off = BITMAP_OFFSET(frame);
+        frames[idx] |= ((u8) 1 << off);
     }
 }
 
@@ -52,35 +53,35 @@ void frame_clear(u64 frame_addr)
 {
     if (frame_addr < nframes * PAGE_SIZE) {
         u64 frame = frame_addr >> PAGE_SHIFT;
-        u64 idx = INDEX_FROM_BIT(frame);
-        u64 off = OFFSET_FROM_BIT(frame);
-        frames[idx] &= ~((u32) 1 << off);
+        u64 idx = BITMAP_INDEX(frame);
+        u64 off = BITMAP_OFFSET(frame);
+        frames[idx] &= ~((u8) 1 << off);
     }
 }
 
 /* Determine if a physical frame available */
-u32 frame_test(u64 frame_addr)
+u8 frame_test(u64 frame_addr)
 {
     if (!(frame_addr < nframes * PAGE_SIZE)) return 1;
 
     u64 frame = frame_addr >> PAGE_SHIFT;
-    u64 idx = INDEX_FROM_BIT(frame);
-    u64 off = OFFSET_FROM_BIT(frame);
-    return frames[idx] & ((u32) 1 << off); // WARN: perhaps double negation is needed here
+    u64 idx = BITMAP_INDEX(frame);
+    u64 off = BITMAP_OFFSET(frame);
+    return frames[idx] & ((u8) 1 << off);
 }
 
 /* Find the first available frame */
 u64 first_free_frame()
 {
-    for (u64 i = 0; i < INDEX_FROM_BIT(nframes); ++i) {
-        if (frames[i] == (u32) ~0) continue; // all frames are reserved
-        for (u64 j = 0; j < 32; ++j) {
+    for (u64 i = 0; i < BITMAP_INDEX(nframes); ++i) {
+        if (frames[i] == (u8) ~0) continue; // all frames are reserved
+        for (u64 j = 0; j < 8; ++j) {
             u64 bit = 1 << j;
             if ( !(frames[i] & bit) )
-                return (i << 5) + j;
+                return (i << 3) + j;
         }
     }
-    // FIXME: wtf should I return? Error handling here
+    // FIXME: wtf should I return? Zero, cause it always is occupied by allocator's metadata?
 }
 
 void page_alloc(pml_entry* page, u64 flags)
@@ -90,16 +91,23 @@ void page_alloc(pml_entry* page, u64 flags)
     u64 idx = first_free_frame();
     u64 addr = idx << PAGE_SHIFT;
     frame_set(addr);
-    page->bits.address = addr;
+    page->bits.address = idx;
     page->bits.present = 1;
+    flags = (flags & PML_FLAGS_MASK) & ~(PML_FLAG_HUGE);
     page->full |= flags;
+
     ++unavailable_memory;
 }
 
 void page_free(pml_entry* page)
 {
+    u64 addr = page->bits.address;
+
+    if (!frame_test(addr)) return;
+
     frame_clear(page->bits.address);
     page->bits.address = 0; // prevent use after free
+
     --unavailable_memory;
 }
 

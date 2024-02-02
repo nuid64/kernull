@@ -9,6 +9,9 @@ global _start
 _start:
         mov        esp, stack_top
 
+; TODO: Move Multiboot2 info to a known place
+;       to avoid corruption and to free that memory after
+
         push       0                                          ; to pop in 64-bit register
         push       eax                                        ; multiboot2 magic
         push       0                                          ; to pop in 64-bit register
@@ -33,14 +36,14 @@ extern initial_page_tables
 
         ; map first P4 entry to P3 table
         mov        eax, 0x1000                                 ; P3 table offset...
-        add        eax, edi                                    ; ... from P4
+        add        eax, edi                                    ; ...from P4
         or         eax, 0b11                                   ; PRESENT | WRITABLE
         mov        [edi], eax                                  ; P4[0] = &P3[0] | PRESENT | WRITABLE
 
         add        edi, 0x1000                                 ; P3
         ; map first P3 entry to P2 table
         mov        eax, 0x1000                                 ; P2 table offset...
-        add        eax, edi                                    ; ... from P3
+        add        eax, edi                                    ; ...from P3
         or         eax, 0b11                                   ; PRESENT | WRITABLE
         mov        [edi], eax                                  ; P3[0] = &P2[0] | PRESENT | WRITABLE
 

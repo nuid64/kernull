@@ -1,6 +1,10 @@
-#include "multiboot2.h"
-#include "multiboot2_parser.h"
+#include <kernel/page_alloc.h>
+#include <multiboot2.h>
+#include <multiboot2_parser.h>
 #include <kernel/vga_print.h>
+#include <arch/x86/pml.h>
+#include <kernel/page_alloc.h>
+#include <kernel/mm.h>
 
 extern u64 kernel_end; /* End of kernel code */
 
@@ -22,22 +26,22 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
 
      /* Highest physicall address available */
     u64 memory_end = multiboot_get_memory_end(tags);
-    u64 memsize = memory_end + 1 - 1024*1024; // first mebibyte is shitful...
 
     gdt_init();
     idt_init();
     mmu_init(memory_end, kernel_end);
     pit_init();
 
-    vga_print("Kernel end: ");
-    vga_print_num((u64) &kernel_end);
-    vga_print("\n");
-    vga_print("Highest address: ");
-    vga_print_num(memory_end);
-    vga_print("\n");
-    vga_print("Memory size: ");
-    vga_print_num(memsize);
-    vga_print("\nConvert it to MiB/KiB by yourself.\n");
+    pml_entry page = {0};
+    page_alloc(&page, PML_FLAG_WRITABLE);
+
+    u64 paddr = page.bits.address << PAGE_SHIFT;
+    u64 vaddr = 0xFFFFFFFFFFF00000;
+    map_addr((void*) vaddr, (void*) paddr, 0);
+
+    char* joke = (char*) vaddr;
+    __builtin_memcpy(joke, "The great thing about this message is that it's nuid bytes long\n", 64);
+    vga_print(joke);
 
     vga_print("kmain dispatcher is here. So far so good. "
               "Executing protocol \"nuidpocalypse\"\n");

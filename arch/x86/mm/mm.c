@@ -2,10 +2,12 @@
 #include <kernel/mm.h>
 #include <kernel/page_alloc.h>
 #include <kernel/vga_print.h>
+#include <kernel/kmalloc.h>
 #include <arch/x86/asm.h>
 #include <arch/x86/idt.h>
 #include <arch/x86/regs.h>
 #include <arch/x86/pml.h>
+#include <assert.h>
 
 #define KERNEL_PML_ACCESS 0x03
 #define USER_PML_ACCESS   0x07
@@ -16,10 +18,8 @@
 
 #define PML3_MASK  0x3FFFFFFF
 #define PML2_MASK    0x1FFFFF
-#define PT_MASK  PAGE_LOW_MASK
-#define ENTRY_MASK      0x1FF
-
-void page_fault(struct regs* r);
+#define PML1_MASK       0xFFF
+#define PML_ENTRY_MASK  0x1FF
 
 #define TABLE_ATTRIBUTE __attribute((aligned(PAGE_SIZE)))
 pml_entry initial_page_tables[3][512] TABLE_ATTRIBUTE = {0};
@@ -36,23 +36,54 @@ pml_entry heap_base_pml1[512*3] TABLE_ATTRIBUTE = {0};
 
 pml_entry* current_pml4;
 
+void page_fault_handler(struct regs* r);
+
 void* mmu_to_virt(u64 phys_addr)
 {
     return (void*) (phys_addr | HIGH_MAP_REGION);
 }
 
+/* Map 4KiB virtual page */
+void map_addr(void* virt_addr, void* phys_addr, u64 flags)
+{
+    assert(((u64) phys_addr & PAGE_LOW_MASK) == 0);
+    assert(((u64) virt_addr & PAGE_LOW_MASK) == 0);
+
+    u64 page_addr = ((u64) virt_addr) >> PAGE_SHIFT;
+    pml_entry* table = current_pml4;
+    for (int i = 0; i < 3; ++i) {
+        size_t idx = (page_addr >> (27 - i*9)) & PML_ENTRY_MASK;
+
+        if (!table[idx].bits.present) {
+            pml_entry table_page = {0};
+            page_alloc(&table_page, PML_FLAG_WRITABLE);
+            table[idx] = table_page;
+        }
+
+        void* next_table_addr = (void*) (table[idx].bits.address << PAGE_SHIFT);
+        table = (pml_entry*) mmu_to_virt((u64) next_table_addr);
+    }
+
+    size_t idx = page_addr & PML_ENTRY_MASK;
+    table[idx].bits.address = (u64) phys_addr;
+    table[idx].bits.present = 1;
+     /* Ignore stupid attempts to broke sth */
+    flags = (flags & PML_FLAGS_MASK) & ~(PML_FLAG_HUGE);
+    table[idx].full |= flags;
+}
+
 /* Get the physical address
    If page is not mapped, a negative value from -1 to -4 returned, which indicates which level
    of the page directory is unmapped (-1 = no PML4, -4 = no page in PML1) */
-u64 mmu_to_phys(pml_entry* root, u64 virt_addr)
+u64 mmu_translate(pml_entry* root, u64 virt_addr)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
     u64 page_addr = real_bits >> PAGE_SHIFT;
 
-    u32 pml4_entry_idx = (page_addr >> 27) & ENTRY_MASK;
-    u32 pml3_entry_idx = (page_addr >> 18) & ENTRY_MASK;
-    u32 pml2_entry_idx = (page_addr >> 9)  & ENTRY_MASK;
-    u32 pml1_entry_idx = page_addr         & ENTRY_MASK;
+    size_t pml4_entry_idx = (page_addr >> 27) & PML_ENTRY_MASK;
+    size_t pml3_entry_idx = (page_addr >> 18) & PML_ENTRY_MASK;
+    size_t pml2_entry_idx = (page_addr >> 9)  & PML_ENTRY_MASK;
+    size_t pml1_entry_idx = page_addr         & PML_ENTRY_MASK;
 
     if (!root[pml4_entry_idx].bits.present) return -1;
 
@@ -74,7 +105,7 @@ u64 mmu_to_phys(pml_entry* root, u64 virt_addr)
     if (!pml1[pml1_entry_idx].bits.present) return -4;
     next_addr = pml1[pml1_entry_idx].bits.address << PAGE_SHIFT;
 
-    return (next_addr | (virt_addr & PT_MASK));
+    return (next_addr | (virt_addr & PML1_MASK));
 }
 
 /* Get pml entry for a virtual address */
@@ -83,10 +114,10 @@ pml_entry* mmu_get_page(u64 virt_addr)
     u64 real_bits = virt_addr & CANONICAL_MASK;
     u64 page_addr = real_bits >> PAGE_SHIFT;
 
-    u32 pml4_entry_idx = (page_addr >> 27) & ENTRY_MASK;
-    u32 pml3_entry_idx = (page_addr >> 18) & ENTRY_MASK;
-    u32 pml2_entry_idx = (page_addr >> 9)  & ENTRY_MASK;
-    u32 pml1_entry_idx = page_addr         & ENTRY_MASK;
+    u32 pml4_entry_idx = (page_addr >> 27) & PML_ENTRY_MASK;
+    u32 pml3_entry_idx = (page_addr >> 18) & PML_ENTRY_MASK;
+    u32 pml2_entry_idx = (page_addr >> 9)  & PML_ENTRY_MASK;
+    u32 pml1_entry_idx = page_addr         & PML_ENTRY_MASK;
 
     if (!current_pml4[pml4_entry_idx].bits.present) return NULL;
 
@@ -135,16 +166,15 @@ void mmu_invalidate(u64 addr)
     invlpg(addr);
 }
 
-/* Get page and containing PML entries */
 u8 mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out, pml_entry** pml2_out, pml_entry** pml1_out)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
     u64 page_addr = real_bits >> PAGE_SHIFT;
 
-    u32 pml4_entry_idx = (page_addr >> 27) & ENTRY_MASK;
-    u32 pml3_entry_idx  = (page_addr >> 18) & ENTRY_MASK;
-    u32 pml2_entry_idx   = (page_addr >> 9) & ENTRY_MASK;
-    u32 pml1_entry_idx   = page_addr & ENTRY_MASK;
+    u32 pml4_entry_idx  = (page_addr >> 27) & PML_ENTRY_MASK;
+    u32 pml3_entry_idx  = (page_addr >> 18) & PML_ENTRY_MASK;
+    u32 pml2_entry_idx  = (page_addr >> 9) & PML_ENTRY_MASK;
+    u32 pml1_entry_idx  = page_addr & PML_ENTRY_MASK;
 
     // clean outputs
     // omitting pml4 because it will be assigned a value
@@ -159,11 +189,11 @@ u8 mmu_get_page_deep(u64 virt_addr, pml_entry** pml4_out, pml_entry** pml3_out, 
     *pml3_out = &pml3[pml3_entry_idx];
     if (!(**pml3_out).bits.present) return 1;
 
-    pml_entry* pml2 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml2 = mmu_to_virt(pml3[pml3_entry_idx].bits.address << PAGE_SHIFT);
     *pml2_out = &pml2[pml2_entry_idx];
     if (!(**pml2_out).bits.present) return 1;
 
-    pml_entry* pml1 = mmu_to_virt(current_pml4[pml4_entry_idx].bits.address << PAGE_SHIFT);
+    pml_entry* pml1 = mmu_to_virt(pml2[pml2_entry_idx].bits.address << PAGE_SHIFT);
     *pml1_out = &pml1[pml1_entry_idx];
     if (!(**pml1_out).bits.present) return 1; // WARN: Maybe it's unnecessary
 
@@ -189,7 +219,7 @@ void mmu_init(size_t memsize, u64 kernel_end)
     high_base_pml4[511].full = (u64) &high_base_pml3 | KERNEL_PML_ACCESS;
     high_base_pml4[510].full = (u64) &heap_base_pml3 | KERNEL_PML_ACCESS;
 
-    /* Identity map from 0xFFFFFFE000000000 */
+    /* Identity map 128GiB from 0xFFFFFF8000000000 */
     for (u64 i = 0; i < 64; ++i) {
         high_base_pml3[i].full = (u64) &high_base_pml2s[i] | KERNEL_PML_ACCESS;
         for (u64 j = 0; j < 512; ++j) {
@@ -202,9 +232,9 @@ void mmu_init(size_t memsize, u64 kernel_end)
 
     /* Map kernel space */
     u64 end_pml1r = ((u64) &kernel_end + PAGE_LOW_MASK) & PAGE_SIZE_MASK; // N bytes
-    u64 low_pages = end_pml1r >> PAGE_SHIFT;                       // N pages
-    low_pages = (low_pages + PAGE_LOW_MASK) & ~PAGE_LOW_MASK;      // round up a page
-    u64 pml2_count = (low_pages + ENTRY_MASK) >> 9;                // N 512-page blocks
+    u64 low_pages = end_pml1r >> PAGE_SHIFT;                              // N pages
+    low_pages = (low_pages + PAGE_LOW_MASK) & ~PAGE_LOW_MASK;             // round up a page
+    u64 pml2_count = (low_pages + PML_ENTRY_MASK) >> 9;                       // N 512-page blocks
     for (size_t j = 0; j < pml2_count; ++j) {
         low_base_pml4s[1][j].full = (u64) &low_base_pml2s[j] | KERNEL_PML_ACCESS;
         for (int i = 0; i < 512; ++i)
@@ -235,12 +265,12 @@ void mmu_init(size_t memsize, u64 kernel_end)
     /* Setup page allocator */
     page_allocator_init(first_free_page, memsize);
 
-    /* Adjust heap allocator's start address */
-    extern u64 placement_address;
-    placement_address = KERNEL_HEAP_START + (PAGE_SIZE * metadata_pages);
+    /* Setup heap allocator */
+    u64 placement_address = KERNEL_HEAP_START + (PAGE_SIZE * metadata_pages);
+    kheap_allocator_init(placement_address);
 
     /* Set PAGE_FAULT handler */
-    irq_set_handler(0x0E, (int_handler) page_fault);
+    irq_set_handler(0x0E, (int_handler) page_fault_handler);
 }
 
 /* Page fault error code structure */
@@ -258,7 +288,7 @@ struct page_fault_err {
     u64 sgx_viol          : 1; /* SGX violation */
 };
 
-void page_fault(struct regs* r) {
+void page_fault_handler(struct regs* r) {
     u64 fault_addr = get_cr2();
 
     struct page_fault_err* err = (struct page_fault_err*) &r->err_code;
@@ -271,16 +301,16 @@ void page_fault(struct regs* r) {
     // why
     vga_print("Cause: ");
     if (!err->present) {
-        vga_print("Page is not present ");
+        vga_print("page is not present ");
     }
     if (err->reserved_set) {
-        vga_print("Reserved bit set");
+        vga_print("reserved bit set ");
     }
     if (err->prot_key_viol) {
-        vga_print("Protection-key violation");
+        vga_print("protection-key violation ");
     }
     if (err->shadow_stack_acc) {
-        vga_print("Shadow-stack access ");
+        vga_print("shadow-stack access ");
     }
     if (err->sgx_viol) {
         vga_print("SGX violation");
@@ -290,7 +320,7 @@ void page_fault(struct regs* r) {
     // when
     vga_print("On: ");
     if (err->instruction_fetch) {
-        vga_print("Instruction fetch");
+        vga_print("instruction fetch");
     } else {
         vga_print("Data ");
         if (err->write) {
@@ -304,10 +334,10 @@ void page_fault(struct regs* r) {
     // blame
     vga_print("Blame: ");
     if (err->user) {
-        vga_print("User"); // well, actually we can't blame any user at this point. Bummer
+        vga_print("user"); // well, actually we can't blame any user at this point. Bummer
     } else {
-        vga_print("Kernel");
+        vga_print("kernel");
     }
 
-    asm ("cli; hlt");
+    abort();
 }

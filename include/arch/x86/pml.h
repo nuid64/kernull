@@ -2,6 +2,15 @@
 
 #include <kernel/types.h>
 
+#define PML_FLAG_WRITABLE                0x02
+#define PML_FLAG_USER                    0x04
+#define PML_FLAG_WRITETHROUGH            0x08
+#define PML_FLAG_NOCACHE                 0x10
+#define PML_FLAG_HUGE                    0x80
+#define PML_FLAG_GLOBAL                 0x100
+#define PML_FLAG_NOEXECUTE 0x8000000000000000
+#define PML_FLAGS_MASK     0x800000000000019E
+
 typedef union {
     struct {
         u64 present     : 1;  /* Page currently in memory (it can be swapped) */

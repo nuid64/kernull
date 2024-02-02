@@ -11,14 +11,6 @@
 #define KERNEL_STACK_START KERNEL_STACK_END + KERNEL_STACK_SIZE
 #define HIGH_MAP_REGION    0xFFFFFF8000000000
 
-#define MMU_FLAG_WRITABLE     0x02
-#define MMU_FLAG_USER         0x04
-#define MMU_FLAG_WRITETHROUGH 0x08
-#define MMU_FLAG_NOCACHE      0x10
-#define MMU_FLAG_HUGE         0x80
-#define MMU_FLAG_GLOBAL       0x100
-#define MMU_FLAG_NOEXECUTE    0x8000000000000000
-
 #define PAGE_SIZE         0x1000
 #define LARGE_PAGE_SIZE 0x200000
 #define PAGE_SIZE_MASK 0xFFFFFFFFFFFFF000
@@ -27,9 +19,9 @@
 
 void       mmu_init(size_t memsize, u64 first_free_page);
 
+void       map_addr(void* phys_addr, void* virt_addr, u64 flags);
 pml_entry* mmu_get_current_dir();
 pml_entry* mmu_get_kernel_dir();
-void*      mmu_to_virt(u64 phys_addr);
 u64        mmu_translate(pml_entry* root, u64 virt_addr);
 pml_entry* mmu_get_page(u64 virt_addr);
 void       mmu_set_directory(pml_entry* new);
