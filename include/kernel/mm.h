@@ -19,7 +19,7 @@
 
 void       mmu_init(size_t memsize, u64 first_free_page);
 
-void       map_addr(void* phys_addr, void* virt_addr, u64 flags);
+void       map_addr(void* virt_addr, void* phys_addr, u64 flags);
 pml_entry* mmu_get_current_dir();
 pml_entry* mmu_get_kernel_dir();
 u64        mmu_translate(pml_entry* root, u64 virt_addr);

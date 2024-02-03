@@ -132,13 +132,13 @@ pml_entry* mmu_get_page(u64 virt_addr)
 }
 
 /* Get amount of usable memory in KiB */
-size_t mmu_get_total_memory()
+size_t mmu_total_memory()
 {
     return get_total_memory();
 }
 
 /* Get amount of used memory in KiB */
-size_t mmu_get_used_memory()
+size_t mmu_used_memory()
 {
     return get_used_memory();
 }
@@ -234,7 +234,7 @@ void mmu_init(size_t memsize, u64 kernel_end)
     u64 end_pml1r = ((u64) &kernel_end + PAGE_LOW_MASK) & PAGE_SIZE_MASK; // N bytes
     u64 low_pages = end_pml1r >> PAGE_SHIFT;                              // N pages
     low_pages = (low_pages + PAGE_LOW_MASK) & ~PAGE_LOW_MASK;             // round up a page
-    u64 pml2_count = (low_pages + PML_ENTRY_MASK) >> 9;                       // N 512-page blocks
+    u64 pml2_count = (low_pages + PML_ENTRY_MASK) >> 9;                   // N 512-page blocks
     for (size_t j = 0; j < pml2_count; ++j) {
         low_base_pml4s[1][j].full = (u64) &low_base_pml2s[j] | KERNEL_PML_ACCESS;
         for (int i = 0; i < 512; ++i)
@@ -266,8 +266,8 @@ void mmu_init(size_t memsize, u64 kernel_end)
     page_allocator_init(first_free_page, memsize);
 
     /* Setup heap allocator */
-    u64 placement_address = KERNEL_HEAP_START + (PAGE_SIZE * metadata_pages);
-    kheap_allocator_init(placement_address);
+    void* heap_start = (void*) KERNEL_HEAP_START + (metadata_pages * PAGE_SIZE);
+    kheap_allocator_init(heap_start);
 
     /* Set PAGE_FAULT handler */
     irq_set_handler(0x0E, (int_handler) page_fault_handler);
