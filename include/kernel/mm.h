@@ -28,6 +28,5 @@ void       mmu_set_directory(pml_entry *new);
 void       mmu_invalidate(u64 addr);
 u8         mmu_get_page_deep(u64 virt_addr, pml_entry **pml4_out, pml_entry **pml3_out,
                              pml_entry **pml2_out, pml_entry **pml1_out);
-void*      memset(void *dest, int c, size_t n); // TODO: Make string.h for such things
 size_t     mmu_total_memory();
 size_t     mmu_used_memory();

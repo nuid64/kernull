@@ -1,5 +1,6 @@
-#include <kernel/types.h>
 #include <kernel/vga_print.h>
+#include <kernel/types.h>
+#include <kernel/string.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -19,14 +20,6 @@ static inline u16 entry(char uc, u8 color)
     return (u16) uc | (u16) color << 8;
 }
  
-size_t strlen(const char *str)
-{
-    size_t len = 0;
-    while (str[len])
-        len++;
-    return len;
-}
-
 void vga_terminal_initialize()
 {
     vga_row = 0;

@@ -6,6 +6,7 @@
 #include <arch/x86/pml.h>
 #include <kernel/page_alloc.h>
 #include <kernel/mm.h>
+#include <string.h>
 
 extern u64 kernel_end; /* End of kernel code */
 
@@ -35,9 +36,12 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
     pit_init();
 
     vga_print("Now I'll try to joke on my heap\n");
-    char *joke = (char *) kmalloc(65);
-    __builtin_memcpy(joke, "The great thing about this message is that it's nuid bytes long\n", 64);
-    vga_print(joke);
+    char *joke = "The great thing about this message is that it's more than nuid bytes long\n";
+    size_t joke_len = strlen(joke);
+
+    char *joke_heap = (char *) kmalloc(joke_len + 1);
+    memcpy(joke_heap, joke, joke_len);
+    vga_print(joke_heap);
     vga_print("As you can see the joke is fuck\n\n");
 
     vga_print("kmain dispatcher is here. So far so good. "

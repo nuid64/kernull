@@ -200,17 +200,6 @@ u8 mmu_get_page_deep(u64 virt_addr, pml_entry **pml4_out, pml_entry **pml3_out, 
     return 0;
 }
 
-void *memset(void *dest, int c, size_t n)
-{
-    asm (
-        "cld; rep stosb"
-        : "=c"((int){0})
-        : "D"(dest), "a"(c), "c"(n)
-        : "flags", "memory"
-    );
-    return dest;
-}
-
 void mmu_init(size_t memsize, u64 kernel_end)
 {
     current_pml4 = high_base_pml4;
