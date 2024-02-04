@@ -1,10 +1,13 @@
 #include <kernel/types.h>
 #include <kernel/vga_print.h>
+
+static const size_t VGA_WIDTH = 80;
+static const size_t VGA_HEIGHT = 25;
  
 size_t vga_row;
 size_t vga_column;
 u8 vga_color;
-u16* vga_buffer;
+u16 *vga_buffer;
  
 static inline u8 entry_color(enum vga_color fg, enum vga_color bg)
 {
@@ -16,7 +19,7 @@ static inline u16 entry(char uc, u8 color)
     return (u16) uc | (u16) color << 8;
 }
  
-size_t strlen(const char* str)
+size_t strlen(const char *str)
 {
     size_t len = 0;
     while (str[len])
@@ -29,7 +32,7 @@ void vga_terminal_initialize()
     vga_row = 0;
     vga_column = 0;
     vga_color = entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-    vga_buffer = (u16*) 0xB8000;
+    vga_buffer = (u16 *) 0xB8000;
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             const size_t index = y * VGA_WIDTH + x;
@@ -85,13 +88,13 @@ void vga_putchar(char c)
     }
 }
  
-void vga_write(const char* s, size_t size)
+void vga_write(const char *s, size_t size)
 {
     for (size_t i = 0; i < size; i++)
         vga_putchar(s[i]);
 }
  
-void vga_print(const char* s)
+void vga_print(const char *s)
 {
     vga_write(s, strlen(s));
 }

@@ -137,7 +137,7 @@ void irq_set_handler(u8 irq, int_handler handler)
     irq_handlers[irq] = handler;
 }
 
-struct regs* isr_handler(struct regs* r)
+struct regs *isr_handler(struct regs *r)
 {
     if (irq_handlers[r->int_no]) {
         int_handler handler = irq_handlers[r->int_no];
@@ -147,7 +147,7 @@ struct regs* isr_handler(struct regs* r)
     return r;
 }
 
-struct regs* irq_handler(struct regs* r)
+struct regs *irq_handler(struct regs *r)
 {
     // send EOI signal
     if (r->int_no >= 40) {

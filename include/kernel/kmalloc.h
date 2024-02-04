@@ -2,6 +2,6 @@
 
 #include <kernel/types.h>
 
-void kheap_allocator_init(void* start);
+void kheap_allocator_init(void *start);
 void* kmalloc(size_t size);
-void kfree(void* ptr);
+void kfree(void *ptr);

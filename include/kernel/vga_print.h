@@ -2,9 +2,6 @@
 
 #include <kernel/types.h>
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
-
 enum vga_color {
     VGA_COLOR_BLACK = 0,
     VGA_COLOR_BLUE = 1,
@@ -28,5 +25,5 @@ void vga_terminal_initialize();
 void vga_set_color(u8 color);
 void vga_set_pos(u8 x, u8 y);
 void vga_putchar(char c);
-void vga_print(const char* s);
+void vga_print(const char *s);
 void vga_print_num(u64 num);

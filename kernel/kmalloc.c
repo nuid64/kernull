@@ -21,20 +21,20 @@ struct block {
     struct block* next;
 } typedef block_t;
 
-block_t* split_block(block_t* block, size_t size);
-int are_adjacent(block_t* block, block_t* next);
-void coalesce_blocks(block_t* block, block_t* next);
+block_t *split_block(block_t *block, size_t size);
+int are_adjacent(block_t *block, block_t *next);
+void coalesce_blocks(block_t *block, block_t *next);
 
-static block_t* free_block_list;
-static void* heap_start;
-static void* heap_end;
+static block_t *free_block_list;
+static void *heap_start;
+static void *heap_end;
 
 // TODO: Implement heap size decreasing
-void* sbrk(u64 incr)
+void *sbrk(u64 incr)
 {
     if (incr == 0) return heap_end;
     incr = (incr + PAGE_LOW_MASK) & ~PAGE_LOW_MASK;
-    void* heap_end_old = heap_end;
+    void *heap_end_old = heap_end;
 
     // Allocate and map some pages
     u64 pages_to_alloc = incr / PAGE_SIZE;
@@ -42,7 +42,7 @@ void* sbrk(u64 incr)
         pml_entry page = {0};
         page_alloc(&page, PML_FLAG_WRITABLE);
 
-        void* paddr = (void*) (page.bits.address << PAGE_SHIFT);
+        void *paddr = (void *) (page.bits.address << PAGE_SHIFT);
         map_addr(heap_end, paddr, PML_FLAG_WRITABLE);
 
         heap_end += PAGE_SIZE;
@@ -51,7 +51,7 @@ void* sbrk(u64 incr)
     return heap_end_old;
 }
 
-void kheap_allocator_init(void* start)
+void kheap_allocator_init(void *start)
 {
     assert((u64) start >= KERNEL_HEAP_START);   // be sane
     assert(((u64) start & PAGE_LOW_MASK) == 0); // be page-aligned
@@ -62,7 +62,7 @@ void kheap_allocator_init(void* start)
     free_block_list = NULL;
 }
 
-void* kmalloc(size_t size)
+void *kmalloc(size_t size)
 {
     /* Sanity check */
     if (size > mmu_total_memory()) {
@@ -84,7 +84,7 @@ void* kmalloc(size_t size)
     /* First block check */
     if (free_block_list->size >= size) {
         // Split block
-        block_t* block_old = free_block_list;
+        block_t *block_old = free_block_list;
         free_block_list = split_block(free_block_list, size);
 
         /* Skip the size of the block before it */
@@ -92,8 +92,8 @@ void* kmalloc(size_t size)
     }
 
     /* Next blocks check */
-    block_t* prev = free_block_list;
-    block_t* block = prev->next;
+    block_t *prev = free_block_list;
+    block_t *block = prev->next;
 
     while (block != NULL) {
         if (block->size < size) {
@@ -109,16 +109,16 @@ void* kmalloc(size_t size)
     }
 
     /* Unsatisfied. I'll start my own block, with size and bytes */
-    block_t* new = sbrk(size + sizeof(size_t));
+    block_t *new = sbrk(size + sizeof(size_t));
     new->size = size;
     new->next = NULL;
 
     return &new->next;
 }
 
-void kfree(void* ptr)
+void kfree(void *ptr)
 {
-    block_t* freed = (block_t*) (((u8*) ptr) - sizeof(size_t)); // Grab size
+    block_t *freed = (block_t *) (((u8 *) ptr) - sizeof(size_t)); // Grab size
     freed->next = NULL;
 
     /* No blocks */
@@ -147,8 +147,8 @@ void kfree(void* ptr)
     }
 
     /* Many blocks */
-    block_t* prev = free_block_list;
-    block_t* block = prev->next;
+    block_t *prev = free_block_list;
+    block_t *block = prev->next;
 
     while (block < freed && block != NULL) {
         prev = block;
@@ -167,14 +167,14 @@ void kfree(void* ptr)
 }
 
 /* Split block and return next free block */
-block_t* split_block(block_t* block, size_t size)
+block_t *split_block(block_t *block, size_t size)
 {
     size_t rem = block->size - size;
 
     if (rem > sizeof(block_t)) {
         block->size = size;
 
-        block_t* rem_block = (block_t*) (((size_t) block) + sizeof(size_t) + size);
+        block_t *rem_block = (block_t *) (((size_t) block) + sizeof(size_t) + size);
         rem_block->size = rem - sizeof(size_t);
         rem_block->next = block->next;
         block->next = NULL;
@@ -185,12 +185,12 @@ block_t* split_block(block_t* block, size_t size)
     return block->next;
 }
 
-int are_adjacent(block_t* block, block_t* next)
+int are_adjacent(block_t *block, block_t *next)
 {
     return (((size_t) block) + (block->size + sizeof(size_t)) == (size_t) next);
 }
 
-void coalesce_blocks(block_t* block, block_t* next)
+void coalesce_blocks(block_t *block, block_t *next)
 {
     block->size += next->size + sizeof(size_t);
     block->next = next->next;

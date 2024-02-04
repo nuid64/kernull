@@ -7,7 +7,7 @@
 void idt_init();
 void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs);
 
-typedef u32 (*int_handler) (struct regs*);
+typedef u32 (*int_handler) (struct regs *);
 void irq_set_handler(u8 irq, int_handler handler);
 
 union idt_attributes {

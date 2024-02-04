@@ -22,12 +22,12 @@ static void pit_set_timer_freq(u64 hz)
     outb(PIT_A, (divisor >> 8) & PIT_MASK);
 }
 
-u32 pit_interrupt(struct regs* r)
+u32 pit_interrupt(struct regs *r)
 {
     // do nothing for now
 
     // ...except printing that *\o/*
-    extern void vga_print(char* str);
+    extern void vga_print(char *str);
     vga_print("tick\n");
 
     return 1;

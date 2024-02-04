@@ -23,7 +23,8 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
 
         return;
     }
-    struct multiboot_tag* tags = (struct multiboot_tag*) (mb_info_addr + 8);
+    struct multiboot_tag *tags = (struct multiboot_tag *) (mb_info_addr + 8);
+    u8* a;
 
      /* Highest physicall address available */
     u64 memory_end = multiboot_get_memory_end(tags);
@@ -34,7 +35,7 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
     pit_init();
 
     vga_print("Now I'll try to joke on my heap\n");
-    char* joke = (char*) kmalloc(65);
+    char *joke = (char *) kmalloc(65);
     __builtin_memcpy(joke, "The great thing about this message is that it's nuid bytes long\n", 64);
     vga_print(joke);
     vga_print("As you can see the joke is fuck\n\n");
