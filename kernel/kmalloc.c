@@ -1,12 +1,10 @@
 #include <kernel/kmalloc.h>
 #include <kernel/types.h>
+#include <kernel/printk.h>
 #include <kernel/page_alloc.h>
 #include <kernel/mm.h>
 #include <arch/x86/pml.h>
 #include <assert.h>
-
-// TODO: Report error properly
-#include <kernel/printk.h>
 
 /* Approach
  * Blocks are stored in-place and contains their size and, if free, pointer to the next free block
@@ -66,7 +64,7 @@ void *kmalloc(size_t size)
 {
     /* Sanity check */
     if (size > mmu_total_memory()) {
-        printk("[ERR] You're asking for too much (0x%X). Go jerk off and get some sleep.", size);
+        printk("kmalloc: You're asking for too much (%dKiB). Go jerk off and get some sleep.", size / 1024);
         return NULL;
     }
 
