@@ -1,5 +1,5 @@
-#include <arch/x86/asm.h>
 #include <arch/x86/pic.h>
+#include <arch/x86/asm.h>
 
 void pic_remap()
 {

@@ -1,5 +1,5 @@
-#include "multiboot2_parser.h"
-#include "multiboot2.h"
+#include <multiboot2_parser.h>
+#include <multiboot2.h>
 
 struct multiboot_tag *multiboot_find_tag(struct multiboot_tag *tags, u32 tag_type)
 {

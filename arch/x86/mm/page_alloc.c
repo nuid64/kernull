@@ -1,10 +1,10 @@
 #include <kernel/page_alloc.h>
 #include <kernel/types.h>
-#include <kernel/mm.h>
+#include <kernel/printk.h>
 #include <kernel/string.h>
-#include "arch/x86/asm.h"
-#include "arch/x86/pml.h"
-#include "kernel/vga_print.h"
+#include <kernel/mm.h>
+#include <arch/x86/asm.h>
+#include <arch/x86/pml.h>
 
 #define BITMAP_INDEX(b) ((b) >> 3)
 #define BITMAP_OFFSET(b) ((b) & 0x07)

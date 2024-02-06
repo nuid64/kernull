@@ -1,7 +1,7 @@
 #include <kernel/types.h>
 #include <kernel/mm.h>
 #include <kernel/page_alloc.h>
-#include <kernel/vga_print.h>
+#include <kernel/printk.h>
 #include <kernel/kmalloc.h>
 #include <arch/x86/asm.h>
 #include <arch/x86/idt.h>
@@ -283,49 +283,47 @@ void page_fault_handler(struct regs *r) {
     struct page_fault_err *err = (struct page_fault_err *) &r->err_code;
 
     // fuck
-    vga_print("Page fault at address ");
-    vga_print_num(fault_addr);
-    vga_print("\n");
+    printk("Page fault at address 0x%X\n", fault_addr);
 
     // why
-    vga_print("Cause: ");
+    printk("Cause: ");
     if (!err->present) {
-        vga_print("page is not present ");
+        printk("page is not present ");
     }
     if (err->reserved_set) {
-        vga_print("reserved bit set ");
+        printk("reserved bit set ");
     }
     if (err->prot_key_viol) {
-        vga_print("protection-key violation ");
+        printk("protection-key violation ");
     }
     if (err->shadow_stack_acc) {
-        vga_print("shadow-stack access ");
+        printk("shadow-stack access ");
     }
     if (err->sgx_viol) {
-        vga_print("SGX violation");
+        printk("SGX violation");
     }
-    vga_print("\n");
+    printk("\n");
 
     // when
-    vga_print("On: ");
+    printk("On: ");
     if (err->instruction_fetch) {
-        vga_print("instruction fetch");
+        printk("instruction fetch");
     } else {
-        vga_print("Data ");
+        printk("Data ");
         if (err->write) {
-            vga_print("write");
+            printk("write");
         } else {
-            vga_print("read");
+            printk("read");
         }
     }
-    vga_print("\n");
+    printk("\n");
 
     // blame
-    vga_print("Blame: ");
+    printk("Blame: ");
     if (err->user) {
-        vga_print("user"); // well, actually we can't blame any user at this point. Bummer
+        printk("user"); // well, actually we can't blame any user at this point. Bummer
     } else {
-        vga_print("kernel");
+        printk("kernel");
     }
 
     abort();

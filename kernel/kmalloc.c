@@ -6,7 +6,7 @@
 #include <assert.h>
 
 // TODO: Report error properly
-#include <kernel/vga_print.h>
+#include <kernel/printk.h>
 
 /* Approach
  * Blocks are stored in-place and contains their size and, if free, pointer to the next free block
@@ -66,9 +66,7 @@ void *kmalloc(size_t size)
 {
     /* Sanity check */
     if (size > mmu_total_memory()) {
-        vga_print("[ERR] You're asking for too much (");
-        vga_print_num(size);
-        vga_print("). Go jerk off and get some sleep.");
+        printk("[ERR] You're asking for too much (0x%X). Go jerk off and get some sleep.", size);
         return NULL;
     }
 

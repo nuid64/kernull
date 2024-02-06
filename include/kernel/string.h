@@ -1,6 +1,5 @@
 #pragma once
 
-#include "kernel/types.h"
 #include <stddef.h>
 
 /* Search in S for C */

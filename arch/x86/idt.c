@@ -1,9 +1,9 @@
+#include <arch/x86/idt.h>
 #include <kernel/types.h>
 #include <arch/x86/asm.h>
 #include <arch/x86/regs.h>
 #include <arch/x86/segment_selector.h>
 #include <arch/x86/pic.h>
-#include <arch/x86/idt.h>
 
 static idtr IDTR;
 static idt_entry IDT[256];

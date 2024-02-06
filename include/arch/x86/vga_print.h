@@ -26,4 +26,3 @@ void vga_set_color(u8 color);
 void vga_set_pos(u8 x, u8 y);
 void vga_putchar(char c);
 void vga_print(const char *s);
-void vga_print_num(u64 num);

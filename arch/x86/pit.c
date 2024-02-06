@@ -27,8 +27,8 @@ u32 pit_interrupt(struct regs *r)
     // do nothing for now
 
     // ...except printing that *\o/*
-    extern void vga_print(char *str);
-    vga_print("tick\n");
+    extern void printk(char *fmt, ...);
+    printk("tick\n");
 
     return 1;
 }
