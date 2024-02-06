@@ -162,7 +162,7 @@ void kfree(void *ptr)
     if (are_adjacent(prev, freed)) {
         coalesce_blocks(prev, freed);
     }
-}
+} __attribute((malloc));
 
 /* Split block and return next free block */
 block_t *split_block(block_t *block, size_t size)
