@@ -8,10 +8,14 @@ void itoa(char *buf, size_t num, u8 base)
     static const int digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     u8 idx = 0;
-    while (num != 0) {
-        u64 rem = num % base;
-        buf[idx++] = digits[rem];
-        num /= base;
+    if (num == 0) {
+        buf[idx++] = '0';
+    } else {
+        while (num != 0) {
+            u64 rem = num % base;
+            buf[idx++] = digits[rem];
+            num /= base;
+        }
     }
     buf[idx] = '\0';
 
@@ -22,7 +26,6 @@ void itoa(char *buf, size_t num, u8 base)
         u8 tmp = buf[end - idx];
         buf[end - idx] = buf[idx];
         buf[idx--] = tmp;
-        // --idx;
     }
 }
 
