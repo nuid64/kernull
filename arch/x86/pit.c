@@ -26,11 +26,7 @@ u32 pit_interrupt(struct regs *r)
 {
     // do nothing for now
 
-    // ...except printing that *\o/*
-    extern void printk(char *fmt, ...);
-    printk("tick\n");
-
-    return 1;
+    return 0;
 }
 
 void pit_init()

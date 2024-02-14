@@ -27,7 +27,7 @@ typedef struct {
     union idt_attributes attrs;      /* Attributes byte */
     u16 base_mid;
     u32 base_high;
-    u32 _res;                        /* Available */
+    u32 _res;
 } idt_entry;
 
 typedef struct __attribute((packed)) {

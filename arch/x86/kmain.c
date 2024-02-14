@@ -10,6 +10,7 @@ extern void gdt_init();
 extern void idt_init();
 extern void mmu_init(size_t memsize, u64 kernel_end);
 extern void pit_init();
+extern void ps2_init();
 
 void kmain(u64 mb_info_addr, u32 mb_magic)
 {
@@ -29,6 +30,11 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
     idt_init();
     mmu_init(memory_end, kernel_end);
     pit_init();
+    ps2_init();
 
     printk("Executin%c %s %d.NUIDPOCALYPSE\n", 'g', "protocol", 666);
+    printk("[ERROR]: Password required\nEnter THE password to proceed: ");
+    asm ("sti");
+
+    while(1) ;
 }

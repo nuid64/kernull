@@ -1,3 +1,4 @@
+#include <kernel/types.h>
 #include <arch/x86/pic.h>
 #include <arch/x86/asm.h>
 
@@ -20,4 +21,12 @@ void pic_remap()
     // masks
     outb(PIC1_DATA, 0x00);
     outb(PIC2_DATA, 0x00);
+}
+
+void irq_ack(u8 irq_no)
+{
+    if (irq_no >= 8) {
+        outb(PIC2_COMMAND, PIC_EOI);
+    }
+    outb(PIC1_COMMAND, PIC_EOI);
 }

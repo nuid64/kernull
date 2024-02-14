@@ -6,6 +6,7 @@
 #include <arch/x86/pic.h>
 
 static idtr IDTR;
+__attribute((aligned(0x10)))
 static idt_entry IDT[256];
 static int_handler irq_handlers[256];
 
@@ -149,16 +150,12 @@ struct regs *isr_handler(struct regs *r)
 
 struct regs *irq_handler(struct regs *r)
 {
-    // send EOI signal
-    if (r->int_no >= 40) {
-        outb(0xA0, 0x20);  // to slave
-    }
-    outb(0x20, 0x20); // to master
-
     if (irq_handlers[r->int_no]) {
         int_handler handler = irq_handlers[r->int_no];
         handler(r);
     }
+
+    irq_ack(r->int_no - 32);
 
     return r;
 }

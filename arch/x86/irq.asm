@@ -48,11 +48,11 @@ ISR_ERR   13
 ISR_ERR   14
 ISR_NOERR 15
 ISR_NOERR 16
-ISR_NOERR 17
+ISR_ERR 17
 ISR_NOERR 18
 ISR_NOERR 19
 ISR_NOERR 20
-ISR_NOERR 21
+ISR_ERR 21
 ISR_NOERR 22
 ISR_NOERR 23
 ISR_NOERR 24
@@ -125,7 +125,6 @@ isr_common:
         swapgs
 
         add        rsp, 16                                     ; forget error code and interrupt
-        sti
         iretq
 
 
@@ -174,5 +173,4 @@ irq_common:
         swapgs
 
         add        rsp, 16                                     ; forget error code and interrupt
-        sti
         iretq

@@ -4,7 +4,7 @@
 
 inline void invlpg(u64 addr)
 {
-    asm (
+    asm volatile (
         "invlpg (%0)"
         : : "r" (addr)
     );
@@ -13,7 +13,7 @@ inline void invlpg(u64 addr)
 inline u64 get_cr2()
 {
     u64 cr2;
-    asm (
+    asm volatile (
         "mov %%cr2, %0"
         : "=r" (cr2)
     );
@@ -22,7 +22,7 @@ inline u64 get_cr2()
 
 inline void set_cr3(u64 value)
 {
-    asm (
+    asm volatile (
         "movq %0, %%cr3"
         : : "r" (value)
     );
@@ -31,7 +31,7 @@ inline void set_cr3(u64 value)
 inline u8 inb(u64 port)
 {
     u8 rv;
-    asm (
+    asm volatile (
         "inb %1, %0"
         : "=a" (rv)
         : "dN" (port)
@@ -42,7 +42,7 @@ inline u8 inb(u64 port)
 inline u16 inw(u64 port)
 {
     u16 rv;
-    asm (
+    asm volatile (
         "inw %1, %0"
         : "=a" (rv)
         : "dN" (port)
@@ -53,7 +53,7 @@ inline u16 inw(u64 port)
 inline u32 inl(u64 port)
 {
     u32 rv;
-    asm (
+    asm volatile (
         "inl %%dx, %%eax"
         : "=a" (rv)
         : "dN" (port)
@@ -63,7 +63,7 @@ inline u32 inl(u64 port)
 
 inline void outb(u64 port, u8 data)
 {
-    asm (
+    asm volatile (
         "outb %1, %0"
         : : "dN" (port), "a" (data)
     );
@@ -71,7 +71,7 @@ inline void outb(u64 port, u8 data)
 
 inline void outw(u64 port, u16 data)
 {
-    asm (
+    asm volatile (
         "outw %1, %0"
         : : "dN" (port), "a" (data)
     );
@@ -79,7 +79,7 @@ inline void outw(u64 port, u16 data)
 
 inline void outl(u64 port, u32 data)
 {
-    asm (
+    asm volatile (
         "outl %%eax, %%dx"
         : : "dN" (port), "a" (data)
     );
