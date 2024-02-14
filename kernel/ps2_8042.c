@@ -130,7 +130,7 @@ u32 kbd_int_handler(struct regs *r)
     s.full = inb(STATUS_REG);
     if (s.bits.output_full) {
         u8 data = inb(DATA_PORT);
-        printk("%X", data);
+        printk("%x", data);
     }
 
     return 0;

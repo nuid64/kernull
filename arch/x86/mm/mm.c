@@ -283,7 +283,7 @@ void page_fault_handler(struct regs *r) {
     struct page_fault_err *err = (struct page_fault_err *) &r->err_code;
 
     // fuck
-    printk("Page fault at address 0x%X\n", fault_addr);
+    printk("Page fault at address 0x%x\n", fault_addr);
 
     // why
     printk("Cause: ");

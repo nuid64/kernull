@@ -50,7 +50,7 @@ void vprintk(const char *restrict fmt, va_list list)
                     vga_print(va_arg(list, char *));
                     break;
                 }
-                case 'X': {
+                case 'x': {
                     char str[24] = {0};
                     itoa(str, va_arg(list, u64), 16);
                     vga_print(str);
