@@ -2,6 +2,7 @@
 #include <kernel/printk.h>
 #include <multiboot2.h>
 #include <multiboot2_parser.h>
+#include <kernel/ps2_keyboard.h>
 
 extern u64 kernel_end; /* End of kernel code */
 
@@ -32,9 +33,12 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
     pit_init();
     ps2_init();
 
+    asm ("sti");
+    ps2_kbd_command(PS2_KBD_COM_ECHO);
+    ps2_kbd_command_arg(PS2_KBD_COM_SET_SCAN_SET, 2);
+
     printk("Executin%c %s %d.NUIDPOCALYPSE\n", 'g', "protocol", 666);
     printk("[ERROR]: Password required\nEnter THE password to proceed: ");
-    asm ("sti");
 
     while(1) ;
 }

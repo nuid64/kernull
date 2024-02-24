@@ -115,14 +115,33 @@ void ps2_port1_write(u8 data)
     return ps2_write(data);
 }
 
+void ps2_port1_disable()
+{
+    ps2_command(COMMAND_PORT1_DISABLE);
+}
+
+void ps2_port1_enable()
+{
+    ps2_command(COMMAND_PORT1_ENABLE);
+}
+
 void ps2_port2_write(u8 data)
 {
     ps2_command(COMMAND_SEND_NEXT_PORT2);
     return ps2_write(data);
 }
 
+void ps2_port2_disable()
+{
+    ps2_command(COMMAND_PORT2_DISABLE);
+}
 
-// TODO: Handle by keyboard driver
+void ps2_port2_enable()
+{
+    ps2_command(COMMAND_PORT2_ENABLE);
+}
+
+extern void keyboard_handler(u8 data);
 u32 kbd_int_handler(struct regs *r)
 {
     // FIX: Keyboard IRQ occurs right after enabling interrupts
@@ -130,7 +149,7 @@ u32 kbd_int_handler(struct regs *r)
     s.full = inb(STATUS_REG);
     if (s.bits.output_full) {
         u8 data = inb(DATA_PORT);
-        printk("%x", data);
+        keyboard_handler(data);
     }
 
     return 0;
