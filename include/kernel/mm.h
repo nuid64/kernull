@@ -3,6 +3,7 @@
 /* INFO: Yes. Including arch-dependent code in (wannabe)arch-independent header.
  * Only x86 is supported at the time. Fuck off.
  */
+#include <kernel/types.h>
 #include <arch/x86/pml.h>
 
 #define KERNEL_HEAP_START  0xFFFFFF0000000000

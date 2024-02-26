@@ -1,4 +1,5 @@
 #include <kernel/printk.h>
+
 #include <kernel/types.h>
 #include <arch/x86/vga_print.h>
 #include <stdarg.h>

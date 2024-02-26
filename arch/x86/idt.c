@@ -1,4 +1,5 @@
 #include <arch/x86/idt.h>
+
 #include <kernel/types.h>
 #include <arch/x86/asm.h>
 #include <arch/x86/regs.h>

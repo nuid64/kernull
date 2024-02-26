@@ -1,4 +1,5 @@
 #include <kernel/string.h>
+
 #include <kernel/types.h>
 
 /* Search in S for C */

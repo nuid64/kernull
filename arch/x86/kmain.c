@@ -1,8 +1,8 @@
 #include <kernel/types.h>
 #include <kernel/printk.h>
+#include <kernel/ps2_keyboard.h>
 #include <multiboot2.h>
 #include <multiboot2_parser.h>
-#include <kernel/ps2_keyboard.h>
 
 extern u64 kernel_end; /* End of kernel code */
 

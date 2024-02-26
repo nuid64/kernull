@@ -1,5 +1,6 @@
-#include <kernel/types.h>
 #include <kernel/mm.h>
+
+#include <kernel/types.h>
 #include <kernel/page_alloc.h>
 #include <kernel/printk.h>
 #include <kernel/kmalloc.h>

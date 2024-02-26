@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <kernel/types.h>
 
 void kheap_allocator_init(void *start);
 void* kmalloc(size_t size);
