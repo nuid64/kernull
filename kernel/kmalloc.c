@@ -60,6 +60,7 @@ void kheap_allocator_init(void *start)
     free_block_list = NULL;
 }
 
+__attribute((malloc))
 void *kmalloc(size_t size)
 {
     /* Sanity check */
