@@ -30,10 +30,11 @@ To achieve usability and, as a victory gesture, compile kernull under kernull, t
 - [x] Setup paging
 - [x] Frame allocator
 - [x] Kernel heap allocator
-- [ ] (halfway done) Keyboard support
+- [X] PS/2 support
 - [ ] Multitasking support
 - [ ] VFS
 - [ ] Userspace
+- [ ] Keyboard support
 - [ ] Program loading
 - [ ] Syscalls
 - [ ] Fork and execute
