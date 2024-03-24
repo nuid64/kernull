@@ -170,7 +170,7 @@ void ps2_init()
 
     config.bits.port1_interrupt = 1;
     config.bits.port2_interrupt = 0;
-    config.bits.port1_translation = 1;
+    config.bits.port1_translation = 0;
 
     ps2_command_arg(COMMAND_SET_CONFIG, config.full);
 
