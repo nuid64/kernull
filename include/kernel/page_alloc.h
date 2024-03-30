@@ -1,7 +1,7 @@
 #pragma once
 
 #include <kernel/types.h>
-#include <arch/x86/pml.h>
+#include <arch/x86_64/pml.h>
 
 void page_allocator_init(void *first_free_page, size_t memsize);
 void page_alloc(pml_entry *page, u64 flags);

@@ -1,10 +1,9 @@
 #pragma once
 
-/* INFO: Yes. Including arch-dependent code in (wannabe)arch-independent header.
- * Only x86 is supported at the time. Fuck off.
- */
 #include <kernel/types.h>
-#include <arch/x86/pml.h>
+#ifdef ARCH_X86_64
+#include <arch/x86_64/pml.h>
+#endif
 
 #define KERNEL_HEAP_START  0xFFFFFF0000000000
 #define KERNEL_STACK_SIZE  256 * 1024

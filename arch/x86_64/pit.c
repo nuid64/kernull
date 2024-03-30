@@ -1,7 +1,7 @@
 #include <kernel/types.h>
-#include <arch/x86/asm.h>
-#include <arch/x86/idt.h>
-#include <arch/x86/regs.h>
+#include <arch/x86_64/asm.h>
+#include <arch/x86_64/idt.h>
+#include <arch/x86_64/regs.h>
 
 #define PIT_A 0x40
 #define PIT_B 0x41

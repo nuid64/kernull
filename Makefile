@@ -7,19 +7,23 @@ PROJ_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BUILD := $(PROJ_ROOT)build
 
 # Assuming you want to build for the only architecture supported :/
-ARCH := x86
+ARCH := x86_64
 
 CC := clang
-ifeq ($(ARCH), x86)
+ifeq ($(ARCH), x86_64)
   CC += --target=x86_64
 endif
 
 CFLAGS := -ffreestanding -nostdlib -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra -O2
 CINCLUDE := -I $(PROJ_ROOT)include
 
+ifeq ($(ARCH), x86_64)
+CDEFINE += -DARCH_X86_64
+endif
+
 NASMFLAGS := -felf64
 
-ifeq ($(ARCH), x86)
+ifeq ($(ARCH), x86_64)
   QEMU := qemu-system-x86_64
 endif
 
@@ -29,6 +33,7 @@ export ARCH
 export CC
 export CFLAGS
 export CINCLUDE
+export CDEFINE
 export NASMFLAGS
 
 

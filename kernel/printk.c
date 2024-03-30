@@ -1,7 +1,7 @@
 #include <kernel/printk.h>
 
 #include <kernel/types.h>
-#include <arch/x86/vga_print.h>
+#include <arch/x86_64/vga_print.h>
 #include <stdarg.h>
 
 void itoa(char *buf, size_t num, u8 base)

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <kernel/types.h>
-#include <arch/x86/regs.h>
-#include <arch/x86/segment_selector.h>
+#include <arch/x86_64/regs.h>
+#include <arch/x86_64/segment_selector.h>
 
 void idt_init();
 void idt_set_gate(u8 idx, u64 base, u16 sel, u8 ist, u8 attrs);

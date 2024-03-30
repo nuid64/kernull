@@ -1,4 +1,4 @@
-#include <arch/x86/vga_print.h>
+#include <arch/x86_64/vga_print.h>
 
 #include <kernel/types.h>
 #include <kernel/string.h>

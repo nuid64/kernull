@@ -8,4 +8,4 @@ mm: $(CSRC) $(COBJ)
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(shell dirname $@)
-	@$(CC) $(CFLAGS) $(CINCLUDE) -c $< -o $@
+	@$(CC) $(CFLAGS) $(CINCLUDE) $(CDEFINE) -c $< -o $@

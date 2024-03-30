@@ -4,7 +4,7 @@
 #include <kernel/printk.h>
 #include <kernel/string.h>
 #include <kernel/mm.h>
-#include <arch/x86/pml.h>
+#include <arch/x86_64/pml.h>
 
 #define BITMAP_INDEX(b) ((b) >> 3)
 #define BITMAP_OFFSET(b) ((b) & 0x07)

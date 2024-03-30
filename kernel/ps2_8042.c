@@ -2,8 +2,8 @@
 
 #include <kernel/types.h>
 #include <kernel/printk.h>
-#include <arch/x86/asm.h>
-#include <arch/x86/idt.h>
+#include <arch/x86_64/asm.h>
+#include <arch/x86_64/idt.h>
 
 const u8 COMMAND_GET_CONFIG      = 0x20;
 const u8 COMMAND_SET_CONFIG      = 0x60;

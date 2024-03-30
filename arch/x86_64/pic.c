@@ -1,7 +1,7 @@
-#include <arch/x86/pic.h>
+#include <arch/x86_64/pic.h>
 
 #include <kernel/types.h>
-#include <arch/x86/asm.h>
+#include <arch/x86_64/asm.h>
 
 void pic_remap()
 {

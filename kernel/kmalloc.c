@@ -4,8 +4,11 @@
 #include <kernel/printk.h>
 #include <kernel/page_alloc.h>
 #include <kernel/mm.h>
-#include <arch/x86/pml.h>
 #include <assert.h>
+
+#ifdef ARCH_X86_64
+#include <arch/x86_64/pml.h>
+#endif
 
 /* Approach
  * Blocks are stored in-place and contains their size and, if free, pointer to the next free block

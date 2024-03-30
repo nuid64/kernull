@@ -19,7 +19,7 @@ all: $(ASMSRC) $(CSRC) $(ASMOBJ) $(COBJ)
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(shell dirname $@)
-	@$(CC) $(CFLAGS) $(CINCLUDE) -c $< -o $@
+	@$(CC) $(CFLAGS) $(CINCLUDE) $(CDEFINE) -c $< -o $@
 
 $(BUILD)/%.o: %.asm
 	@mkdir -p $(shell dirname $@)

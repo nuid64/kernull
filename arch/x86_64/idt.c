@@ -1,10 +1,10 @@
-#include <arch/x86/idt.h>
+#include <arch/x86_64/idt.h>
 
 #include <kernel/types.h>
-#include <arch/x86/asm.h>
-#include <arch/x86/regs.h>
-#include <arch/x86/segment_selector.h>
-#include <arch/x86/pic.h>
+#include <arch/x86_64/asm.h>
+#include <arch/x86_64/regs.h>
+#include <arch/x86_64/segment_selector.h>
+#include <arch/x86_64/pic.h>
 
 static idtr IDTR;
 __attribute((aligned(0x10)))
