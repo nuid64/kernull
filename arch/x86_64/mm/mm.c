@@ -73,6 +73,36 @@ void map_addr(void *virt_addr, void *phys_addr, u64 flags)
     table[idx].full |= flags;
 }
 
+/* Free all of the pages and PMLs allocated */
+void free_address_space(pml_entry *pml4)
+{
+    for (pml_entry *pml3 = pml4; pml3 < pml4 + 512; ++pml3) {
+        if (pml3 == NULL)
+            continue;
+
+        for (pml_entry *pml2 = pml3; pml2 < pml3 + 512; ++pml2) {
+            if (pml2 == NULL)
+                continue;
+
+            for (pml_entry *pml1 = pml2; pml1 < pml2 + 512; ++pml1) {
+                if (pml1 == NULL)
+                    continue;
+
+                for (pml_entry *page = pml1; page < pml1 + 512; ++page) {
+                    if (page == NULL)
+                        continue;
+
+                    /* I really don't give a shit about nesting */
+
+                    kfree(page);
+                }
+            }
+        }
+    }
+
+    kfree(pml4);
+}
+
 /* Get the physical address
    If page is not mapped, a negative value from -1 to -4 returned, which indicates which level
    of the page directory is unmapped (-1 = no PML4, -4 = no page in PML1) */
