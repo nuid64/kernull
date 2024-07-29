@@ -14,7 +14,9 @@ ifeq ($(ARCH), x86_64)
   CC += --target=x86_64
 endif
 
-CFLAGS := -ffreestanding -nostdlib -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra -O2
+CFLAGS := -nostdlib -Wall -Wextra -O2
+CFLAGS += -ffreestanding -fno-strict-aliasing
+CFLAGS += -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2
 CINCLUDE := -I $(PROJ_ROOT)include
 
 ifeq ($(ARCH), x86_64)
