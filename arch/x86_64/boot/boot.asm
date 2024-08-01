@@ -5,6 +5,8 @@ extern long_mode_start
 extern protected_vga_print
 extern protected_vga_set_color
 
+extern GDTR
+
 global _start
 _start:
         mov        esp, stack_top
@@ -26,8 +28,8 @@ _start:
         call       setup_page_tables
         call       enable_paging
 
-        lgdt       [gdt.pointer]
-        jmp        gdt.code:long_mode_start                    ; call kmain from there
+        lgdt       [GDTR]
+        jmp        0x08:long_mode_start                        ; call kmain from there
 
 
 setup_page_tables:
@@ -164,27 +166,6 @@ error:
         pop        esi
         call       protected_vga_print
         hlt
-
-
-gdt:
-        dq 0
-.code: equ $ - gdt
-        dw 0
-        dw 0
-        db 0
-        db 0x9a
-        db 0x20
-        db 0
-.data:
-        dw 0xFFFF
-        dw 0
-        db 0
-        db 0x92
-        db 0
-        db 0
-.pointer:
-        dw $ - gdt - 1
-        dq gdt
 
 
         section .rodata

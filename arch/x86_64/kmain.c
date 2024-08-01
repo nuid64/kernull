@@ -7,7 +7,6 @@
 extern u64 kernel_end; /* End of kernel code */
 
 extern void vga_terminal_initialize();
-extern void gdt_init();
 extern void idt_init();
 extern void mmu_init(size_t memsize, u64 kernel_end);
 extern void pit_init();
@@ -27,7 +26,6 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
      /* Highest physicall address available */
     u64 memory_end = multiboot_get_memory_end(tags);
 
-    gdt_init();
     idt_init();
     mmu_init(memory_end, kernel_end);
     pit_init();

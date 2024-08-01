@@ -40,36 +40,27 @@ typedef struct __attribute((packed)) {
     u64 base; /* GDT address */
 } gdtr;
 
-static gdt_entry GDT[5];
-static gdtr GDTR;
 
-static void gdt_set_entry(u64 idx, u32 base, u32 limit, u8 access, u8 flags);
+#define GDT_ENTRY(base, limit, access, flags)                     \
+    { ((limit) >> 0 & 0xFFFF),                                    \
+      ((base) >> 0 & 0xFFFF),                                     \
+      ((base) >> 16 & 0xFF),                                      \
+      { .full = (access) & 0xFF },                                \
+      { .full = ((limit) >> 16 & 0x0F) | ((flags) << 4 & 0xF0) }, \
+      ((base) >> 24 & 0xFF),                                      \
+    }
+
+gdt_entry GDT[] = {
+    GDT_ENTRY(0, 0, 0, 0),                              /* NULL */
+    GDT_ENTRY(0, 0xFFFFFFFF, 0x9A, 0x0A),               /* Kernel code */
+    GDT_ENTRY(0, 0xFFFFFFFF, 0x92, 0x0C),               /* Kernel data */
+    GDT_ENTRY(0, 0xFFFFFFFF, 0xFA, 0x0A),               /* User code */
+    GDT_ENTRY(0, 0xFFFFFFFF, 0xF2, 0x0C),               /* User data */
+};
+
+gdtr GDTR = {
+    .size = sizeof(GDT) - 1,
+    .base = (u64) &GDT,
+};
 
 extern void gdt_load(u64 gdtr);
-
-void gdt_init()
-{
-    GDTR.size = (sizeof(gdt_entry) * 5) - 1;
-    GDTR.base  = (u64) &GDT;
-
-    gdt_set_entry(0, 0, 0, 0, 0);                /* NULL */
-    gdt_set_entry(1, 0, 0xFFFFFFFF, 0x9A, 0x0A); /* Kernel code */
-    gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0x0C); /* Kernel data */
-    gdt_set_entry(3, 0, 0xFFFFFFFF, 0xFA, 0x0A); /* User code */
-    gdt_set_entry(4, 0, 0xFFFFFFFF, 0xF2, 0x0C); /* User data */
-
-    gdt_load((u64) &GDTR);
-}
-
-static void gdt_set_entry(u64 idx, u32 base, u32 limit, u8 access, u8 flags)
-{
-    GDT[idx].base_low    = base & 0xFFFF;
-    GDT[idx].base_middle = (base >> 16) & 0xFF;
-    GDT[idx].base_high   = (base >> 24) & 0xFF;
-
-    GDT[idx].limit_low   = limit & 0xFFFF;
-    GDT[idx].flags.bits.limit_high  = (limit >> 16) & 0x0F;
-
-    GDT[idx].flags.full |= (flags << 4) & 0xF0;
-    GDT[idx].access.full = access;
-}
