@@ -20,8 +20,8 @@ void  *memset(void *s, int c, size_t n);
 
 /* Append SRC onto DEST */
 char    *strcat(char *restrict dest, const char *restrict src);
-/* Append no more than N characters from SRC onto DEST.  */
 char    *strncat(char *restrict dest, const char *restrict src, size_t n);
+/* Append no more than N characters from SRC onto DEST */
 
 /* Search in S for C until terminating zero */
 char    *strchr(const char *s, int c);

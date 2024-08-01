@@ -74,7 +74,7 @@ void map_addr_in(pml_entry *pml4, void *virt_addr, void *phys_addr, u64 flags)
     size_t idx = page_addr & PML_ENTRY_MASK;
     table[idx].bits.address = (u64) phys_addr;
     table[idx].bits.present = 1;
-     /* Ignore stupid attempts to broke sth */
+    /* Ignore stupid attempts to broke sth */
     flags = (flags & PML_FLAGS_MASK) & ~(PML_FLAG_HUGE);
     table[idx].full |= flags;
 }

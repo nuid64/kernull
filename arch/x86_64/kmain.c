@@ -23,7 +23,7 @@ void kmain(u64 mb_info_addr, u32 mb_magic)
     }
     struct multiboot_tag *tags = (struct multiboot_tag *) (mb_info_addr + 8);
 
-     /* Highest physicall address available */
+    /* Highest physicall address available */
     u64 memory_end = multiboot_get_memory_end(tags);
 
     idt_init();

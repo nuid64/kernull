@@ -18,7 +18,7 @@ static size_t unavailable_memory = 0;
 
 void frame_set(size_t frame_addr);
 
-/* Initialize page allocator. Returns number of pages it requires */
+/* Initialize page allocator */
 void page_allocator_init(void *first_free_page, size_t memsize) {
     nframes = (memsize >> PAGE_SHIFT);
     size_t metadata_bytes = nframes / (sizeof(*frames) * 8);

@@ -13,9 +13,9 @@
 /* Approach
  * Blocks are stored in-place and contains their size and, if free, pointer to the next free block
  * Block's 'next free' pointer is a part of the block's memory and NULLified on the block's reservation
- * Blocks in the list ordered by their addresses
- * On allocation take the First Fit block or create one if no blocks are big enough
- * On free insert freed block keeping list order and coalesce it with adjacent blocks
+ * Blocks in the list are ordered by their addresses
+ * On allocation: take the First Fit block or create one if no block are big enough
+ * On free: insert freed block back into the list keeping order and coalesce it with adjacent blocks
  */
 
 struct block {
@@ -64,6 +64,7 @@ void kheap_allocator_init(void *start)
     free_block_list = NULL;
 }
 
+/* WARN: Returns page-unaligned address */
 __attribute((malloc))
 void *kmalloc(size_t size)
 {
