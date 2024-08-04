@@ -44,14 +44,20 @@ void *mmu_to_virt(u64 phys_addr)
     return (void *) (phys_addr | HIGH_MAP_REGION);
 }
 
-/* Map 4KiB virtual page */
+/* Map 4KiB virtual page in current PML4 */
 void map_addr(void *virt_addr, void *phys_addr, u64 flags)
+{
+    map_addr_in(current_pml4, virt_addr, phys_addr, flags);
+}
+
+/* Map 4KiB virtual page */
+void map_addr_in(pml_entry *pml4, void *virt_addr, void *phys_addr, u64 flags)
 {
     assert(((u64) phys_addr & PAGE_LOW_MASK) == 0);
     assert(((u64) virt_addr & PAGE_LOW_MASK) == 0);
 
     u64 page_addr = ((u64) virt_addr) >> PAGE_SHIFT;
-    pml_entry *table = current_pml4;
+    pml_entry *table = pml4;
     for (int i = 0; i < 3; ++i) {
         size_t idx = (page_addr >> (27 - i*9)) & PML_ENTRY_MASK;
 
@@ -73,10 +79,16 @@ void map_addr(void *virt_addr, void *phys_addr, u64 flags)
     table[idx].full |= flags;
 }
 
+/* Get the physical address of a virtual one in current PML4 */
+u64 mmu_translate(u64 virt_addr)
+{
+    return mmu_translate_via(current_pml4, virt_addr);
+}
+
 /* Get the physical address
    If page is not mapped, a negative value from -1 to -4 returned, which indicates which level
    of the page directory is unmapped (-1 = no PML4, -4 = no page in PML1) */
-u64 mmu_translate(pml_entry *root, u64 virt_addr)
+u64 mmu_translate_via(pml_entry *root, u64 virt_addr)
 {
     u64 real_bits = virt_addr & CANONICAL_MASK;
     u64 page_addr = real_bits >> PAGE_SHIFT;

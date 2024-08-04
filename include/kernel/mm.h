@@ -19,10 +19,13 @@
 
 void       mmu_init(size_t memsize, u64 first_free_page);
 
+void      *mmu_to_virt(u64 phys_addr);
 void       map_addr(void *virt_addr, void *phys_addr, u64 flags);
+void       map_addr_in(pml_entry *pml4, void *virt_addr, void *phys_addr, u64 flags);
 pml_entry *mmu_get_current_dir();
 pml_entry *mmu_get_kernel_dir();
-u64        mmu_translate(pml_entry *root, u64 virt_addr);
+u64        mmu_translate(u64 virt_addr);
+u64        mmu_translate_via(pml_entry *root, u64 virt_addr);
 pml_entry *mmu_get_page(u64 virt_addr);
 void       mmu_set_directory(pml_entry *new);
 void       mmu_invalidate(u64 addr);
