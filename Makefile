@@ -23,7 +23,6 @@ GRUB_CFG := $(ISODIR)boot/grub/grub.cfg
 LDFLAGS := -Tlink/$(TARGET_ARCH).ld -n
 
 CC := clang
-AS := as
 
 CFLAGS ?= -nostdlib -Wall -Wextra -O2 \
           -ffreestanding -fno-strict-aliasing \
@@ -74,8 +73,8 @@ $(KERNELBIN): $(OBJ)
 
 $(BUILDDIR)%.o: %.S
 	mkdir -p $(dir $@)
-	$(AS) -o $@ $<
+	@$(CC) -o $@ $(CFLAGS) $(CINCLUDE) $(CDEFINE) $(TARGET) -c $<
 
 $(BUILDDIR)%.o: %.c
 	mkdir -p $(dir $@)
-	@$(CC) -o $@ $(CFLAGS) $(CINCLUDE) $(CDEFINE) -c $<
+	@$(CC) -o $@ $(CFLAGS) $(CINCLUDE) $(CDEFINE) $(TARGET) -c $<
