@@ -12,10 +12,7 @@ long_mode_start:
         movw       %ax, %fs
         movw       %ax, %gs
 
-        movl       $0xF036, %eax
-        movl       %eax, (0xB8000)
-        movl       $0xF034, %eax
-        movl       %eax, (0xB8002)
+        callq      kmain
 
         cli
         hlt

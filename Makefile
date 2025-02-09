@@ -24,10 +24,11 @@ LDFLAGS := -Tlink/$(TARGET_ARCH).ld -n
 
 CC := clang
 
-CFLAGS ?= -nostdlib -Wall -Wextra -O2 \
+CFLAGS ?= -nostdlib -Wall -Wextra -Werror -O2 \
           -ffreestanding -fno-strict-aliasing \
           -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2
-CINCL ?=
+CINCLUDE ?= -Iinclude
+CDEFINE ?=
 
 # Modules will add to this
 ASMSRC :=
@@ -77,4 +78,4 @@ $(BUILDDIR)%.o: %.S
 
 $(BUILDDIR)%.o: %.c
 	mkdir -p $(dir $@)
-	@$(CC) -o $@ $(CFLAGS) $(CINCLUDE) $(CDEFINE) $(TARGET) -c $<
+	$(CC) -o $@ $(CFLAGS) $(CINCLUDE) $(CDEFINE) $(TARGET) -c $<
