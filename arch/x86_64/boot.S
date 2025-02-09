@@ -11,32 +11,29 @@ _start:
         call       setup_page_tables
         call       enable_paging
 
-        /* Print me. */
-        movl       $0xF036, %eax
-        movl       %eax, 0xB8000
-        movl       $0x0F34, %eax
-        movl       %eax, 0xB8002
+        /* Call kmain from there */
+        lgdt       gdtr
 
-        cli
-        hlt
+        ljmp       $0x08, $long_mode_start
+
 
 setup_page_tables:
         /* Map first P4 entry to P3 table. */
         movl       $p3_table, %eax
-        orl        $0b11, %eax                                 #  Writable | Present
+        orl        $0b11, %eax                                  #  Writable | Present
         movl       %eax, (p4_table)
 
         /* Map first P3 entry to P2 table. */
         movl       $p2_table, %eax
-        orl        $0b11, %eax                                 #  Writable | Present
+        orl        $0b11, %eax                                  #  Writable | Present
         movl       %eax, (p3_table)
 
         /* Map each P2 entry to 2MiB page. */
         movl       $0, %ecx
 .map_p2_table:
-        movl       $0x200000, %eax                             # 2 MiB
+        movl       $0x200000, %eax                              # 2 MiB
         mull       %ecx
-        orl        $0b10000011, %eax                           # Huge | Writable | Present
+        orl        $0b10000011, %eax                            # Huge | Writable | Present
         movl       %eax, p2_table(,%ecx, 8)
 
         incl       %ecx
@@ -140,14 +137,21 @@ error:
 
 
         .section .rodata
+.align 8
+gdtr:
+        .word gdt64_end - gdt64
+        .quad gdt64
+
 gdt64:
         .quad 0
-.code:
-        .short . - gdt64
-        .quad ((1<<53) | (1<<47) | (1<<44) | (1<<43))  # Code segment
-.pointer:
-        .short . - gdt64 - 1
-        .quad gdt64
+        # Code
+        .word 0
+        .word 0
+        .byte 0
+        .byte 0x9A
+        .byte 0xA0
+        .byte 0
+gdt64_end:
 
 
         .section .bss
