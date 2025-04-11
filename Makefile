@@ -5,11 +5,13 @@ MAKEFLAGS += -rR
 
 RM := rm -f
 
-# Assuming you want to build for the only architecture supported
-TARGET_ARCH ?= x86_64
+TARGET_ARCH ?= x86
 ifeq ($(TARGET_ARCH), x86_64)
 TARGET := --target=x86_64
 QEMU := qemu-system-x86_64
+else ifeq ($(TARGET_ARCH), x86)
+TARGET := --target=i386
+QEMU := qemu-system-i386
 endif
 
 PROJDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -26,7 +28,10 @@ CC := clang
 
 CFLAGS ?= -nostdlib -Wall -Wextra -Werror -O2 \
           -ffreestanding -fno-strict-aliasing \
-          -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2
+          -mno-red-zone -mno-mmx -mno-sse -mno-sse2
+ifeq ($(TARGET_ARCH), x86_64)
+CFLAGS += -mcmodel=large
+endif
 CINCLUDE ?= -Iinclude
 CDEFINE ?=
 
@@ -44,7 +49,7 @@ $(patsubst %.S, $(BUILDDIR)%.o, $(filter %.S,$(ASMSRC)))
 
 .PHONY: all clean clean_all format run
 
-all: $(KERNELISO)
+all: clean_all $(KERNELISO)
 
 clean:
 	$(RM) -r $(BUILDDIR)*
