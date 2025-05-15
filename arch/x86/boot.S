@@ -1,36 +1,38 @@
-        .section .text
-        .code32
+.section .text
+.code32
 
 .global _start
 _start:
-        cli
+	cli
 
-        call       multiboot_check
+	movl	$stack_top, %esp
+	movl	$stack_top, %ebp
 
-        movl       %cr0, %eax
-        orb        %al, 1
-        movl       %eax, %cr0
+	call	multiboot_check
 
-        call       kmain
-        hlt
-
-
-multiboot_check: 
-        cmpl       $0x36d76289, %eax
-        jne        multiboot_check.no_multiboot
-        ret
-multiboot_check.no_multiboot: 
-        call       error
+	call	kmain
+halt:
+	hlt
+	jmp	halt
 
 
-/* Oopsie */
+multiboot_check:
+	cmpl	$0x36d76289, %eax
+	jne	multiboot_check.no_multiboot
+	ret
+multiboot_check.no_multiboot:
+	call	error
+
+
+/* Oops */
 error:
-        movw       $0x0F46, (0xB8000)
-        movw       $0x0F4B, (0xB8002)
-        hlt
+	movw	$0x0F46, (0xB8000)
+	movw	$0x0F4B, (0xB8002)
+	cli
+	hlt
 
 
 .align 16
 stack_bottom:
-        .skip 64
+	.skip 0x4000
 stack_top:
