@@ -42,7 +42,7 @@ $(patsubst %.c, $(BUILDDIR)%.o, $(filter %.c,$(CSRC))) \
 $(patsubst %.S, $(BUILDDIR)%.o, $(filter %.S,$(ASMSRC)))
 
 
-.PHONY: all clean clean_all run
+.PHONY: all clean clean_all format run
 
 all: $(KERNELISO)
 
@@ -52,6 +52,9 @@ clean:
 clean_all: clean
 	$(RM) $(KERNELISO)
 	$(RM) $(KERNELBIN)
+
+format:
+	clang-format --style=file -i $(CSRC)
 
 run: $(KERNELISO)
 	@$(QEMU) -cdrom $(KERNELISO)
