@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <arch/x86/memory.h>
 #include <arch/x86/vga_print.h>
 
 extern void gdt_init(void);
@@ -11,6 +12,7 @@ void kmain()
 	vga_terminal_initialize();
 	gdt_init();
 	idt_init();
+	paging_init();
 
 	vga_set_color(VGA_COLOR_GREEN);
 	vga_print("\
