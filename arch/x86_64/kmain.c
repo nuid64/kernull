@@ -3,7 +3,7 @@
 
 #include <arch/x86/vga_print.h>
 
-void kmain()
+void kmain(void)
 {
 	vga_terminal_initialize();
 

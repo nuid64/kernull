@@ -23,7 +23,7 @@ static inline uint16_t entry(char uc, uint8_t color)
 	return (uint16_t)uc | (uint16_t)color << 8;
 }
 
-void vga_terminal_initialize()
+void vga_terminal_initialize(void)
 {
 	vga_row = 0;
 	vga_column = 0;

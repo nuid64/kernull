@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include <arch/x86/memory.h>
 #include <arch/x86/vga_print.h>
@@ -7,7 +7,7 @@
 extern void gdt_init(void);
 extern void idt_init(void);
 
-void kmain()
+void kmain(void)
 {
 	vga_terminal_initialize();
 	gdt_init();
