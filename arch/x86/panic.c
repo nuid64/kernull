@@ -6,5 +6,5 @@ void panic(const char *msg)
 	vga_print("KERNEL PANIC: ");
 	vga_print(msg);
 	for (;;)
-		__asm__ __volatile__("hlt");
+		__asm__ volatile("hlt");
 }

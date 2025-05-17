@@ -64,7 +64,7 @@ void *memmove(void *dest, const void *src, size_t n)
 /* Set N bytes of S to C */
 void *memset(void *s, int c, size_t n)
 {
-	asm("cld; rep stosb"
+	__asm__("cld; rep stosb"
 		: "=c"((int){ 0 })
 		: "D"(s), "a"(c), "c"(n)
 		: "flags", "memory");

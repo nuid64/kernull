@@ -4,7 +4,7 @@
 
 inline void invlpg(uint32_t addr)
 {
-    asm volatile (
+    __asm__ volatile (
         "invlpg (%0)"
         : : "r" (addr)
     );
@@ -12,7 +12,7 @@ inline void invlpg(uint32_t addr)
 
 inline void idt_load(uint32_t addr)
 {
-    asm (
+    __asm__ (
         "lidt %0"
         : : "m"(addr)
     );
@@ -21,7 +21,7 @@ inline void idt_load(uint32_t addr)
 inline uint32_t get_cr2(void)
 {
     uint32_t cr2;
-    asm volatile (
+    __asm__ volatile (
         "mov %%cr2, %0"
         : "=r" (cr2)
     );
@@ -30,7 +30,7 @@ inline uint32_t get_cr2(void)
 
 inline void set_cr3(uint32_t value)
 {
-    asm volatile (
+    __asm__ volatile (
         "movl %0, %%cr3"
         : : "r" (value)
     );
@@ -39,7 +39,7 @@ inline void set_cr3(uint32_t value)
 inline uint8_t inb(uint32_t port)
 {
     uint8_t rv;
-    asm volatile (
+    __asm__ volatile (
         "inb %1, %0"
         : "=a" (rv)
         : "dN" (port)
@@ -50,7 +50,7 @@ inline uint8_t inb(uint32_t port)
 inline uint16_t inw(uint32_t port)
 {
     uint16_t rv;
-    asm volatile (
+    __asm__ volatile (
         "inw %1, %0"
         : "=a" (rv)
         : "dN" (port)
@@ -61,7 +61,7 @@ inline uint16_t inw(uint32_t port)
 inline uint32_t inl(uint32_t port)
 {
     uint32_t rv;
-    asm volatile (
+    __asm__ volatile (
         "inl %%dx, %%eax"
         : "=a" (rv)
         : "dN" (port)
@@ -71,7 +71,7 @@ inline uint32_t inl(uint32_t port)
 
 inline void outb(uint32_t port, uint8_t data)
 {
-    asm volatile (
+    __asm__ volatile (
         "outb %1, %0"
         : : "dN" (port), "a" (data)
     );
@@ -79,7 +79,7 @@ inline void outb(uint32_t port, uint8_t data)
 
 inline void outw(uint32_t port, uint16_t data)
 {
-    asm volatile (
+    __asm__ volatile (
         "outw %1, %0"
         : : "dN" (port), "a" (data)
     );
@@ -87,7 +87,7 @@ inline void outw(uint32_t port, uint16_t data)
 
 inline void outl(uint32_t port, uint32_t data)
 {
-    asm volatile (
+    __asm__ volatile (
         "outl %%eax, %%dx"
         : : "dN" (port), "a" (data)
     );

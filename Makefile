@@ -26,7 +26,7 @@ LDFLAGS := -Tlink/$(TARGET_ARCH).ld -n
 
 CC := clang
 
-CFLAGS ?= -nostdlib -Wall -Wextra -Werror -O2 \
+CFLAGS ?= -std=c23 -nostdlib -Wall -Wextra -Werror -O2 \
           -ffreestanding -fno-strict-aliasing \
           -mno-red-zone -mno-mmx -mno-sse -mno-sse2
 ifeq ($(TARGET_ARCH), x86_64)
