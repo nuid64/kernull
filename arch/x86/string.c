@@ -10,7 +10,7 @@ void *memchr(const void *s, int c, size_t n)
 		++p;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /* Compare N bytes of S1 and S2 */
@@ -65,9 +65,9 @@ void *memmove(void *dest, const void *src, size_t n)
 void *memset(void *s, int c, size_t n)
 {
 	__asm__("cld; rep stosb"
-		: "=c"((int){ 0 })
-		: "D"(s), "a"(c), "c"(n)
-		: "flags", "memory");
+			: "=c"((int){ 0 })
+			: "D"(s), "a"(c), "c"(n)
+			: "flags", "memory");
 	return s;
 }
 
@@ -111,7 +111,7 @@ char *strchr(const char *s, int c)
 		++s;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /* Compare S1 and S2 */
@@ -177,7 +177,7 @@ size_t strlen(const char *s)
 /* Find the last occurrence of C in S */
 char *strrchr(const char *s, int c)
 {
-	char *ret = NULL;
+	char *ret = nullptr;
 	while (*s != '\0') {
 		if (*s == (unsigned char)c)
 			ret = (char *)s;
@@ -203,5 +203,5 @@ char *strstr(const char *dom, const char *sub)
 		++dom;
 	}
 
-	return NULL;
+	return nullptr;
 }
