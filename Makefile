@@ -23,6 +23,9 @@ KERNELISO := $(ISODIR)kernull-$(TARGET_ARCH).iso
 GRUB_CFG := $(ISODIR)boot/grub/grub.cfg
 
 LDFLAGS := -Tlink/$(TARGET_ARCH).ld -n
+ifeq ($(TARGET_ARCH), x86)
+LDFLAGS += -melf_i386
+endif
 
 CC := clang
 
@@ -31,9 +34,19 @@ CFLAGS ?= -std=c23 -nostdlib -Wall -Wextra -Werror -O2 \
           -mno-red-zone -mno-mmx -mno-sse -mno-sse2
 ifeq ($(TARGET_ARCH), x86_64)
 CFLAGS += -mcmodel=large
+else ifeq ($(TARGET_ARCH), x86)
+CFLAGS += -m32
 endif
+
 CINCLUDE ?= -Iinclude
-CDEFINE ?=
+
+CDEFINE ?= -D
+ifeq ($(TARGET_ARCH), x86_64)
+CDEFINE += CONFIG_X86_64
+else ifeq ($(TARGET_ARCH), x86)
+CDEFINE += CONFIG_X86_32
+endif
+
 
 # Modules will add to this
 ASMSRC :=
