@@ -23,9 +23,10 @@ static void pit_set_timer_freq(uint32_t hz)
 	outb(PIT_A, (divisor >> 8) & PIT_MASK);
 }
 
+extern void switch_task(void);
 uint32_t pit_interrupt(struct regs *)
 {
-	/* Do nothing for now */
+	// switch_task();
 
 	return 0;
 }
