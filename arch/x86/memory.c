@@ -1,9 +1,7 @@
 #include <arch/x86/memory.h>
 
-static uint32_t page_directory[PAGE_ENTRIES]
-	__attribute__((aligned(PAGE_SIZE)));
-static uint32_t first_page_table[PAGE_ENTRIES]
-	__attribute__((aligned(PAGE_SIZE)));
+uint32_t page_directory[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
+uint32_t first_page_table[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 
 void paging_init(void)
 {

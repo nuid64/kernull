@@ -46,10 +46,41 @@ struct gdt_ptr {
 } __attribute__((packed));
 
 struct tss_entry {
-	uint32_t prev_tss;
+	uint16_t prev_task_link;
+	uint16_t reserved0;
 	uint32_t esp0;
-	uint32_t ss0;
-	uint32_t unused[23];
+	uint16_t ss0;
+	uint16_t reserved1;
+	uint32_t esp1;
+	uint16_t ss1;
+	uint16_t reserved2;
+	uint32_t esp2;
+	uint16_t ss2;
+	uint16_t reserved3;
+	uint32_t cr3;
+	uint32_t eip;
+	uint32_t eflags;
+	uint32_t eax, ecx, edx, ebx;
+	uint32_t esp, ebp, esi, edi;
+	uint16_t es;
+	uint16_t reserved4;
+	uint16_t cs;
+	uint16_t reserved5;
+	uint16_t ss;
+	uint16_t reserved6;
+	uint16_t ds;
+	uint16_t reserved7;
+	uint16_t fs;
+	uint16_t reserved8;
+	uint16_t gs;
+	uint16_t reserved9;
+	uint16_t ldt_selector;
+	uint16_t reserved10;
+	uint16_t trap;
+	uint16_t iomap_base;
 } __attribute__((packed));
 
 void gdt_init(void);
+void gdt_set_gate(uint32_t idx, uint32_t base, uint32_t limit, uint8_t access,
+				  uint8_t gran);
+void gdt_set_tss_gate(uint32_t idx, struct tss_entry *tss);

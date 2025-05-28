@@ -5,7 +5,7 @@
 
 void gdt_init(void);
 
-struct gdt_entry GDT[6];
+struct gdt_entry GDT[8];
 struct gdt_ptr GDTR;
 struct tss_entry TSS;
 
@@ -13,7 +13,7 @@ extern void gdt_load(uint32_t gdtr);
 extern void gdt_flush(uint32_t);
 extern void tss_flush();
 
-void gdt_set_gate(int i, uint32_t base, uint32_t limit, uint8_t access,
+void gdt_set_gate(uint32_t i, uint32_t base, uint32_t limit, uint8_t access,
 				  uint8_t gran)
 {
 	GDT[i].limit_low = limit & 0xFFFF;
@@ -24,17 +24,20 @@ void gdt_set_gate(int i, uint32_t base, uint32_t limit, uint8_t access,
 	GDT[i].base_high = (base >> 24) & 0xFF;
 }
 
-void write_tss(int index, uint16_t kernel_ss, uint32_t kernel_esp)
+void gdt_set_tss_gate(uint32_t idx, struct tss_entry *tss)
 {
-	uint32_t base = (uint32_t)&TSS;
+	uint32_t base = (uint32_t)tss;
 	uint32_t limit = sizeof(struct tss_entry);
 
-	gdt_set_gate(index, base, limit, 0x89, 0x00);
-	memset(&TSS, 0, sizeof(TSS));
-	TSS.ss0 = kernel_ss;
-	TSS.esp0 = kernel_esp;
+	GDT[idx].limit_low = limit & 0xFFFF;
+	GDT[idx].base_low = base & 0xFFFF;
+	GDT[idx].base_middle = (base >> 16) & 0xFF;
+	GDT[idx].access.full = 0x89;
+	GDT[idx].flags.full = (limit >> 16) & 0x0F;
+	GDT[idx].base_high = (base >> 24) & 0xFF;
 }
 
+extern void tss_install(void);
 void gdt_init(void)
 {
 	GDTR.limit = sizeof(GDT) - 1;
@@ -45,8 +48,8 @@ void gdt_init(void)
 	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Kernel data
 	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User code
 	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User data
-	write_tss(5, 0x10, 0); // TSS setup
+
+	tss_install();
 
 	gdt_flush((uint32_t)&GDTR);
-	tss_flush();
 }
